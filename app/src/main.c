@@ -14,5 +14,6 @@
 void main(void)
 {
 	printk("Zephyr Example Application %s\n", APP_VERSION_STR);
+	Printk("Se om detta funkar");
 }
 
