@@ -12,10 +12,11 @@
  */
 
 #include <stdio.h>
+#include "../includes/client.c"
 
 void main(void)
 {
-	printf("Hello");
+	client();
 }
 	
 	
