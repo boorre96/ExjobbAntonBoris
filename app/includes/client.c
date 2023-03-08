@@ -1,46 +1,57 @@
 // Client side C/C++ program to demonstrate Socket
 // programming
-#include <arpa/inet.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#define PORT 8080
+#include "client.h"
 
-void client(){
-	int status, valread, client_fd;
-	struct sockaddr_in serv_addr;
-	char* hello = "Hello from client";
-	char buffer[1024] = { 0 };
-	if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-		printf("\n Socket creation error \n");
-	
-	}
+void clientInit(Client* client){
+    client->clientFd = -1;
+    memset(&client->serverAddress, 0, sizeof(client->serverAddress));
+    client->serverAddress.sin_family = AF_INET;
+    client->serverAddress.sin_port = htons(PORT);
+}
 
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_port = htons(PORT);
+void clientCleanup(Client* client){
+    if(client->clientFd != -1){
+        close(client->clientFd);
+        client->clientFd = -1;
+    }
+}
 
-	// Convert IPv4 and IPv6 addresses from text to binary
-	// form
-	if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)
-		<= 0) {
-		printf(
-			"\nInvalid address/ Address not supported \n");
-		
-	}
+int clientConnect(Client* client, const char* serverIp){
+    if(client->clientFd != -1){
+        printf("Socket already created\n");
+        return -1;
+    }
 
-	if ((status
-		= connect(client_fd, (struct sockaddr*)&serv_addr,
-				sizeof(serv_addr)))
-		< 0) {
-		printf("\nConnection Failed \n");
-		
-	}
-	send(client_fd, hello, strlen(hello), 0);
-	printf("Hello message sent\n");
-	valread = read(client_fd, buffer, 1024);
-	printf("%s\n", buffer);
+    if(inet_pton(AF_INET, serverIp, &client->serverAddress.sin_addr) <= 0){
+        printf("Invalid address \n");
+        return -1;
+    }
 
-	// closing the connected socket
-	close(client_fd);	
+    if((client->clientFd=socket(AF_INET, SOCK_STREAM, 0)) < 0){
+        printf("Socket creation errror \n");
+        return -1;
+    }
+
+    if(connect(client->clientFd, (struct sockaddr*)&client->serverAddress, sizeof(client->serverAddress)) < 0 ){
+        printf("Connection failed \n");
+        return -1;
+    }
+    return 0;
+}
+
+int clientSend(Client* client, const char* msg){
+    if(send(client->clientFd, msg, strlen(msg),0) == -1){
+        printf("Send failed \n");
+        return -1;
+    }
+}
+
+int clientReceive(Client* client, char* buffer, int size){
+    int bytesReceived = 0;
+
+    if((bytesReceived = read(client->clientFd, buffer, size)) == -1){
+        printf("Receive failed \n");
+    }
+
+    return 0;
 }
