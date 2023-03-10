@@ -1,6 +1,6 @@
 #!/bin/bash
 
-gcc -o client ../includes/client.c
+gcc -o client client.c
 
 ./client
 
