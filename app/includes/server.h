@@ -8,12 +8,28 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-// typedef struct server
-// {
-//     /* data */
-// };
+#define PORT 8080
+const int port = 8080;
+
+typedef struct Server
+{
+    int server_fd;
+    int new_socket;
+    int valread;
+	struct sockaddr_in address;
+	int opt;
+	socklen_t addrlen;
+	char buffer[1024];
+    
+} Server;
 
 
+int createSocket(Server *server);
+void startListening(Server *server);
+void test(Server *server);
+int bindSocket(Server *server);
+void acceptConnection(Server *server);
+void handleMessages(Server *Server);
 
 
 #endif
