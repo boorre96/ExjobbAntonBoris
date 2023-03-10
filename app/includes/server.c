@@ -13,6 +13,7 @@
 int createSocket(Server *server){
 	server->server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server->server_fd < 0){
+		printk("Dosent create Socket... \n");
 		perror("socket failed");
  		exit(EXIT_FAILURE);
 		return 0;
@@ -30,6 +31,7 @@ int createSocket(Server *server){
 
 int bindSocket(Server *server){
 	if (bind(server->server_fd, (struct sockaddr*)&server->address,sizeof(server->address))< 0) {
+		printk("Dosent bind... \n");
  		perror("bind failed");
  		exit(EXIT_FAILURE);
 		return 0;
@@ -46,10 +48,14 @@ int bindSocket(Server *server){
 // 	If a connection request arrives when the queue is full, the client may receive an error with an indication of ECONNREFUSED.
 // 	
 void startListening(Server *server){
-	if (listen(server->server_fd, 1) < 0) {
+	if (listen(server->server_fd, 3) < 0) {
+		printk("Dosent listen... \n");
  		perror("listen");
  		exit(EXIT_FAILURE);
  	}
+	else{
+		printk("Server is listening... \n");
+	}
 }
 
 // 	
@@ -61,7 +67,9 @@ void startListening(Server *server){
 // 	
 
 void acceptConnection(Server *server){
-	if ((server->new_socket = accept(server->server_fd,(struct sockaddr*)&server->address,(socklen_t*)&server->addrlen))< 0) {
+	printk("In acceptConnection function \n");
+	if ((server->new_socket = accept(server->server_fd,(struct sockaddr*)&server->address,(socklen_t*)&server->addrlen))< 0) {	
+		printk("Dosent accept... \n");
  		perror("accept");
  		exit(EXIT_FAILURE);
  	}
@@ -83,12 +91,14 @@ void handleMessages(Server *server){
 // 	This helps in manipulating options for the socket referred by the file descriptor sockfd. 
 // 	This is completely optional, but it helps in reuse of address and port. Prevents error such as: “address already in use”.
 
-void test(Server *server){
+void initiateSocket(Server *server){
 	if (setsockopt(server->server_fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEADDR, &server->opt,sizeof(server->opt))) {
+		printk("Dosent test... \n");
  		perror("setsockopt");
  		exit(EXIT_FAILURE);
  	}
 	else{
+		printk("Passed test()... \n");
 		server->address.sin_family = AF_INET;
 		server->address.sin_addr.s_addr = INADDR_ANY;
 		server->address.sin_port = htons(8080);

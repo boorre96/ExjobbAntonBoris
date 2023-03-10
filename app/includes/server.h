@@ -26,7 +26,7 @@ typedef struct Server
 
 int createSocket(Server *server);
 void startListening(Server *server);
-void test(Server *server);
+void initiateSocket(Server *server);
 int bindSocket(Server *server);
 void acceptConnection(Server *server);
 void handleMessages(Server *Server);

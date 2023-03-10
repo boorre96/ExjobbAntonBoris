@@ -31,16 +31,20 @@ int main(void)
 		printf("Creating server.... \n");
 		//fflush(stdout);
 
+		initiateSocket(&server);
+
 		if(bindSocket(&server)){
 			printk("Binding socket... \n");
-			//fflush(stdout);
+			startListening(&server);
+			acceptConnection(&server);
+			printk("After acceptConnection \n");
 		}
 		else{
 			printk("couldent bind socket.... \n");
 			//fflush(stdout);
 		}
-		startListening(&server);
-		acceptConnection(&server);
+		
+		
 		handleMessages(&server);
 	}
 	else{
