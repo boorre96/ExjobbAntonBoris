@@ -2,45 +2,52 @@
  * Copyright (c) 2021 Nordic Semiconductor ASA
  * SPDX-License-Identifier: Apache-2.0
  */
-
+ 
+#include <zephyr/sys/printk.h>
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/sensor.h>
-
 #include "app_version.h"
 
-#include <zephyr/logging/log.h>
-
-
+#include <zephyr/toolchain.h>
+#include <stddef.h>
+#include <stdarg.h>
+#include <inttypes.h>
+ 
 #include <stdio.h>
+#include "../includes/server.c"
 #include "../includes/client.c"
-/* #include "../includes/client.h" */
+
+
+Server server;
+
 int main(void)
 {
-	Client client;
-	char buffer[1024] = {0};
+	
+	
+	printk("test \n");
+	//fflush(stdout);
+	
+	
+	if(createSocket(&server)){
+		printf("Creating server.... \n");
+		//fflush(stdout);
 
-	clientInit(&client);
-	if(clientConnect(&client, "127.0.0.1") == -1){
-		clientCleanup(&client);
-		return -1;
+		if(bindSocket(&server)){
+			printk("Binding socket... \n");
+			//fflush(stdout);
+		}
+		else{
+			printk("couldent bind socket.... \n");
+			//fflush(stdout);
+		}
+		startListening(&server);
+		acceptConnection(&server);
+		handleMessages(&server);
 	}
-
-	if(clientSend(&client, "Hello from client") == -1){
-		clientCleanup(&client);
-		return -1;
+	else{
+		printk("didn't work");
+		fflush(stdout);
 	}
-
-	printf("Hello message sent \n");
-
-	if(clientReceive(&client, buffer, sizeof(buffer)) == -1){
-		clientCleanup(&client);
-		return -1;
-	}
-
-	printf("$s \n",buffer);
-
-	clientCleanup(&client);
-
 	return 0;
 }
 	
