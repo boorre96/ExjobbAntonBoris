@@ -79,7 +79,7 @@ int main (void) {
 		return -1;
 	}
 
-	printf("$s \n",buffer);
+	printf("%s \n",buffer);
 
 	clientCleanup(&client);
 

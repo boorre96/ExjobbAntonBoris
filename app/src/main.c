@@ -15,7 +15,6 @@
  
 #include <stdio.h>
 #include "../includes/server.c"
-#include "../includes/client.c"
 
 
 Server server;
