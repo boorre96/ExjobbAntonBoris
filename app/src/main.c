@@ -2,18 +2,56 @@
  * Copyright (c) 2021 Nordic Semiconductor ASA
  * SPDX-License-Identifier: Apache-2.0
  */
-
+ 
+#include <zephyr/sys/printk.h>
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/sensor.h>
-
 #include "app_version.h"
 
-#include <zephyr/logging/log.h>
+#include <zephyr/toolchain.h>
+#include <stddef.h>
+#include <stdarg.h>
+#include <inttypes.h>
+ 
+#include <stdio.h>
+#include "../includes/server.c"
 
 
-void main(void)
+Server server;
+
+int main(void)
 {
-	printk("Zephyr Example Application %s\n", APP_VERSION_STR);
-	Printk("Se om detta funkar");
-}
+	
+	
+	printk("test \n");
+	//fflush(stdout);
+	
+	
+	if(createSocket(&server)){
+		printf("Creating server.... \n");
+		//fflush(stdout);
 
+		initiateSocket(&server);
+
+		if(bindSocket(&server)){
+			printk("Binding socket... \n");
+			startListening(&server);
+			acceptConnection(&server);
+			printk("After acceptConnection \n");
+		}
+		else{
+			printk("couldent bind socket.... \n");
+			//fflush(stdout);
+		}
+		
+		
+		handleMessages(&server);
+	}
+	else{
+		printk("didn't work");
+		fflush(stdout);
+	}
+	return 0;
+}
+	
+	
