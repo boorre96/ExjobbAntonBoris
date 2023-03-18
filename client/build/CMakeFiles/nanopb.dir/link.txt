@@ -1,0 +1,2 @@
+/usr/bin/ar qc libnanopb.a "CMakeFiles/nanopb.dir/home/anton-dev/Thesis/my-workspace/modules/lib/nanopb/pb_common.c.o" "CMakeFiles/nanopb.dir/home/anton-dev/Thesis/my-workspace/modules/lib/nanopb/pb_decode.c.o" "CMakeFiles/nanopb.dir/home/anton-dev/Thesis/my-workspace/modules/lib/nanopb/pb_encode.c.o"
+/usr/bin/ranlib libnanopb.a
