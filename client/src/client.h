@@ -16,7 +16,7 @@ typedef struct {
 void clientInit(Client* client);
 void clientCleanup(Client* client);
 int clientConnect(Client* client, const char* serverIp);
-int clientSend(Client* client, const char* msg);
+int clientSend(Client* client, const int number);
 int clientReceive(Client* client, char* buffer, int size);
 
 
