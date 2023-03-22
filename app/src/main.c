@@ -20,108 +20,93 @@
 #include "src/simple.pb.h"
 
 Server server;
-bool encode_message(uint8_t *buffer, size_t buffer_size, size_t *message_length)
-{
-	bool status;
-
-	/* Allocate space on the stack to store the message data.
-	 *
-	 * Nanopb generates simple struct definitions for all the messages.
-	 * - check out the contents of simple.pb.h!
-	 * It is a good idea to always initialize your structures
-	 * so that you do not have garbage data from RAM in there.
-	 */
-	SimpleMessage message = SimpleMessage_init_zero;
-
-	/* Create a stream that will write to our buffer. */
-	pb_ostream_t stream = pb_ostream_from_buffer(buffer, buffer_size);
-
-	/* Fill in the lucky number */
-	message.lucky_number = 13;
-
-	/* Now we are ready to encode the message! */
-	status = pb_encode(&stream, SimpleMessage_fields, &message);
-	*message_length = stream.bytes_written;
-
-	if (!status) {
-		printk("Encoding failed: %s\n", PB_GET_ERROR(&stream));
-	}
-
-	return status;
-}
-
-bool decode_message(uint8_t *buffer, size_t message_length)
-{
-	bool status;
-
-	/* Allocate space for the decoded message. */
-	SimpleMessage message = SimpleMessage_init_zero;
-
-	/* Create a stream that reads from the buffer. */
-	pb_istream_t stream = pb_istream_from_buffer(buffer, message_length);
-
-	/* Now we are ready to decode the message. */
-	status = pb_decode(&stream, SimpleMessage_fields, &message);
-
-	/* Check for errors... */
-	if (status) {
-		/* Print the data contained in the message. */
-		printk("Your lucky number was %d!\n", (int)message.lucky_number);
-	} else {
-		printk("Decoding failed: %s\n", PB_GET_ERROR(&stream));
-	}
-
-	return status;
-}
-
 
 int main(void)
 {
-	
-	/* This is the buffer where we will store our message. */
-	uint8_t buffer[SimpleMessage_size];
-	size_t message_length;
+	if(startWebsocket(&server)){
 
-	/* Encode our message */
-	if (!encode_message(buffer, sizeof(buffer), &message_length)) {
-		return;
+		/*Recieving a protobuf message from client*/
+
+		size_t bytes = read(server.new_socket, server.buffer, sizeof(server.buffer));
+		if(bytes == -1){
+			printk("Error read function \n");
+		}
+		else{
+			
+			SimpleMessage fromClientMessage = SimpleMessage_init_zero;
+			/*
+			Pb_istream_t creates a object which is a structure that represents a nanopb input stream.
+			It initializes the input stream to read data from the server.buffer and bytes tells the stream
+			how many bytes it can read from the given buffer.  
+			*/
+			pb_istream_t stream = pb_istream_from_buffer(server.buffer, bytes);
+
+			/*
+			pb_decode decodes the protobuf message from a serialized binary format.
+			Three arguments:
+			&stream - A pointer to a pb_istream_f structure which represent the input stream that
+					  contains the serialized binary data.
+			SimpleMessage_fields - An array of file descriptors for the protocolbuffer message structure
+							       you wnat to decode. It refers to your .proto file.
+			&fromClientMessage - A pointer to the target message structure where the decoded data should
+								 be stored.  
+			*/
+			if(pb_decode(&stream, SimpleMessage_fields, &fromClientMessage)){
+				printk("Recieved protobuf from client and the decoding worked \n");
+				printk("Your lucky number is: %d! \n", (int)fromClientMessage.lucky_number);
+			}
+			else{
+				printk("Failed to decode the message... \n");
+			}
+		}
+
+		/*Sending a protobuf message to client*/
+
+		memset(server.buffer, 0, bytes);
+		SimpleMessage toClientMessage = {0};
+
+		/*
+		pb_ostream_t creates a object which is a structure that representa a nonopb output stream from a
+		given memory buffer. The output stream is used to store the encoded protocol buffer.
+
+		server.buffer is where the encoded protocol buffer will be stored.
+		*/
+		pb_ostream_t stream = pb_ostream_from_buffer(server.buffer, 1024);
+		toClientMessage.lucky_number = 25;
+		
+		/*
+		pb_encode encodes the protobuf message into a binary format that can be sent over a network or
+		stored in a file.
+		three arguments:
+		&stream - a pointer to a pb_ostream_t object which will represent the output stream where the 
+				  encoded message will be stored.
+		SimpleMessageFields - -||-
+		&toClientMessage - A pointer to the message that you want to encode. This object should be of
+						   the same type as the one described by SimpleMessage_fields (SimpleMessage). 
+		*/
+		bool status = pb_encode(&stream, SimpleMessage_fields, &toClientMessage);
+
+		if(!status){
+			printk("failed to encode... \n");
+		}
+		else{
+			if(send(server.new_socket, server.buffer, stream.bytes_written, 0) == -1){
+				printk("Failed to send to client! \n");
+			}
+			else{
+				printk("Protobuf sent to client! \n");
+			}
+		}
+
+		close(server.new_socket);
+		shutdown(server.server_fd, SHUT_RDWR);
 	}
-
-	/* Now we could transmit the message over network, store it in a file or
-	 * wrap it to a pigeon's leg.
-	 */
-
-	/* But because we are lazy, we will just decode it immediately. */
-	decode_message(buffer, message_length);
+	else{
+		printk("Socket didn't start... \n");
+		close(server.new_socket);
+		shutdown(server.server_fd, SHUT_RDWR);
+	}
 	
-	// printk("test \n");
-	// //fflush(stdout);
-	
-	
-	// if(createSocket(&server)){
-	// 	printf("Creating server.... \n");
-	// 	//fflush(stdout);
-
-	// 	initiateSocket(&server);
-
-	// 	if(bindSocket(&server)){
-	// 		printk("Binding socket... \n");
-	// 		startListening(&server);
-	// 		acceptConnection(&server);
-	// 		printk("After acceptConnection \n");
-	// 	}
-	// 	else{
-	// 		printk("couldent bind socket.... \n");
-	// 		//fflush(stdout);
-	// 	}
-		
-		
-	// 	handleMessages(&server);
-	// }
-	// else{
-	// 	printk("didn't work");
-	// 	fflush(stdout);
-	// }
 	return 0;
 }
 	

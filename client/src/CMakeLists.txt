@@ -3,13 +3,14 @@ cmake_minimum_required(VERSION 3.13.1)
 project(client C)
 
 # Set path to nanopb library
-set(NANOPB_DIR "$ENV{HOME}/Thesis/my-workspace/modules/lib/nanopb")
+set(NANOPB_DIR "/home/boris/exjobb/my-workspace/modules/lib/nanopb")
 
 # Set path to generated protobuf files
-set(PROTOBUF_DIR "$ENV{HOME}/Thesis/my-workspace/ExjobbAntonBoris/app/src")
+set(PROTOBUF_DIR "/home/boris/exjobb/my-workspace/example-application/app/src")
 
 # Include nanopb headers
 include_directories(${NANOPB_DIR})
+include_directories("/home/boris/exjobb/my-workspace/example-application/build/src")
 
 # Add nanopb source code
 set(NANOPB_SRC
