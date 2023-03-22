@@ -23,6 +23,11 @@ int main(void)
 
 	reg_read(0);
 
+	int num;
+	reg_write(1 ,3);
+
+	scanf("%d", num);
+
 	if(startWebsocket(&server)){
 
 		/*Recieving a protobuf message from client*/

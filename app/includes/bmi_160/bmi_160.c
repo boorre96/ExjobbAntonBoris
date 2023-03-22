@@ -18,31 +18,85 @@ static void reg_write(int reg, int val){
     switch(reg){
         case BMI160_REG_ACC_CONF:
             printk("Register number %d: ",reg);
+            LOG_INF("   * acc conf");
             break;
         case BMI160_REG_ACC_RANGE:
             printk("Register number %d: ", reg);
+            LOG_INF("   * acc range");
             break;
+        case BMI160_REG_GYR_CONF:
+            LOG_INF("   * gyr conf");
+            break;
+        case BMI160_REG_GYR_RANGE:
+            LOG_INF("   * gyr range");
+            break;
+        case BMI160_REG_CMD:
+            switch(val){
+            case BMI160_CMD_SOFT_RESET:
+                LOG_INF("   * soft reset");
+                break;
+            default:
+                if((val & BMI160_CMD_PMU_BIT) == BMI160_CMD_PMU_BIT){
+                    int which = (val & BMI160_CMD_PMU_MASK) >> BMI160_CMD_PMU_SHIFT;
+                    int shift;
+                    int pmu_val = val & BMI160_CMD_PMU_VAL_MASK;
+
+                    switch(which){
+                        case 0:
+                            shift = BMI160_PMU_STATUS_ACC_POS;
+                            break;
+                        case 1:
+                            shift = BMI160_PMU_STATUS_GYR_POS;
+                            break;
+                        case 2:
+                        default:
+                            shift = BMI160_PMU_STATUS_MAG_POS;
+                            break;
+                        }
+                        /*
+                        *write over
+                        */
+                    }
+            }
     }
 }
 
 // Register read
 static int reg_read(int reg){
-    printk("Read %x = \n", reg);
-    int val;
+    int val = 1337;
+    printk("Read: %x && Value: %x \n",reg, val);
+
+    LOG_INF("read %x=",reg);
     switch(reg){
         case BMI160_REG_CHIPID:
-            /* printk("Register number %x: , Value: %d \n", reg); */
             LOG_INF("   * get chipid");
             break;
         case BMI160_REG_PMU_STATUS:
-            printk(" * get pmu \n");
             LOG_INF("   * get pmu");
             break;
         case BMI160_REG_STATUS:
-            printk(" * status \n");
             LOG_INF("   * status");
             break;
+        case BMI160_REG_ACC_CONF:
+            LOG_INF("   * acc conf");
+            break;
+        case BMI160_REG_GYR_CONF:
+            LOG_INF("   * gyr conf");
+            break;
+        case BMI160_SPI_START:
+            LOG_INF("   * Bus start");
+            break;
+        case BMI160_REG_ACC_RANGE:
+            LOG_INF("   * acc range");
+            break;
+        case BMI160_REG_GYR_RANGE:
+            LOG_INF("   * gyr range");
+            break;
+        default:
+            LOG_INF("Unknown read %x", reg);
     }
+    LOG_INF("       = %x", val);
+
     return val;
 }
 
