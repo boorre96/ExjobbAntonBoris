@@ -2,6 +2,11 @@
 // programming
 #include "client.h"
 
+#include <stdlib.h>
+#include <pb_encode.h>
+#include <pb_decode.h>
+#include "simple.pb.h"
+
 void clientInit(Client* client){
     client->clientFd = -1;
     memset(&client->serverAddress, 0, sizeof(client->serverAddress));
@@ -39,18 +44,54 @@ int clientConnect(Client* client, const char* serverIp){
     return 0;
 }
 
-int clientSend(Client* client, const char* msg){
-    if(send(client->clientFd, msg, strlen(msg),0) == -1){
+int clientSend(Client* client, const int number){
+    /*Sending a protobuf to server*/
+    printf("clientSend function \n");
+
+    SimpleMessage message = SimpleMessage_init_zero;
+    uint8_t buffer[1024];
+
+    pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
+
+    message.lucky_number = number;
+
+    bool status = pb_encode(&stream, SimpleMessage_fields, &message);
+
+    if(!status){
+        printf("The encoding didn't work! \n");
+        return 0;
+    }
+    if(send(client->clientFd, buffer, stream.bytes_written, 0) == -1){
         printf("Send failed \n");
         return -1;
     }
+
+    printf("protobuf message sent \n");
+
+    return 1;
 }
 
 int clientReceive(Client* client, char* buffer, int size){
+    
+    /*Recieving a protobuf from server*/
     int bytesReceived = 0;
 
     if((bytesReceived = read(client->clientFd, buffer, size)) == -1){
         printf("Receive failed \n");
+    }
+    else{
+        printf("Recieved protobuf from server! \n");
+        /*Decode the protobuf*/
+        SimpleMessage fromServerMessage = SimpleMessage_init_zero;
+		pb_istream_t stream = pb_istream_from_buffer(buffer, bytesReceived);
+
+        if(pb_decode(&stream, SimpleMessage_fields, &fromServerMessage)){
+				printf("Recieved protobuf from client and the decoding worked \n");
+				printf("Your lucky number is: %d! \n", (int)fromServerMessage.lucky_number);
+		}
+		else{
+				printf("Failed to decode the message... \n");
+		}
     }
 
     return 0;
@@ -67,12 +108,11 @@ int main (void) {
 		return -1;
 	}
 
-	if(clientSend(&client, "Hello from client") == -1){
+	if(clientSend(&client, 2) == -1){
 		clientCleanup(&client);
 		return -1;
 	}
 
-	printf("Hello message sent \n");
 
 	if(clientReceive(&client, buffer, sizeof(buffer)) == -1){
 		clientCleanup(&client);
