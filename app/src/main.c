@@ -21,10 +21,10 @@ Server server;
 int main(void)
 {
 
-	reg_read(0);
+	//reg_read(0);
 
 	int num;
-	reg_write(1 ,3);
+	reg_write(64, 64);
 
 	scanf("%d", num);
 

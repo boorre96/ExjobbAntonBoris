@@ -7,21 +7,20 @@
 #include "src/simple.pb.h"
 
 
-#define I2C bosch_bmi160
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(bosch_bmi160);
+
+LOG_MODULE_REGISTER(bmi160_log);
+
 
 // Register write
 static void reg_write(int reg, int val){
-    printk("write %x = %x", reg, val);
+
 
     switch(reg){
         case BMI160_REG_ACC_CONF:
-            printk("Register number %d: ",reg);
             LOG_INF("   * acc conf");
             break;
         case BMI160_REG_ACC_RANGE:
-            printk("Register number %d: ", reg);
             LOG_INF("   * acc range");
             break;
         case BMI160_REG_GYR_CONF:
