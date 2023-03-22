@@ -21,14 +21,12 @@ Server server;
 int main(void)
 {
 
-	//reg_read(0);
-
-	int num;
-	reg_write(64, 64);
-
-	scanf("%d", num);
+	
 
 	if(startWebsocket(&server)){
+		reg_read(&server, 0);
+		reg_write(&server, 0, 2);
+		
 
 		/*Recieving a protobuf message from client*/
 

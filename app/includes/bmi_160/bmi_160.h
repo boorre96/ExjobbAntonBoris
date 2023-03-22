@@ -1,7 +1,9 @@
 #ifndef BMI_160_H_
 #define BMI_160_H_
 
-static void reg_write(int reg, int val);
-static int reg_read(int reg);
+#include "../server.c"
+
+static void reg_write(Server *server, int reg, int val);
+static int reg_read(Server *server, int reg);
 
 #endif /*BMI_160_H_*/
