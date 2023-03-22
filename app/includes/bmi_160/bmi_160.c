@@ -115,8 +115,8 @@ static int reg_read(Server *server, int reg){
 	SimpleMessage message = {0};
 	message.lucky_number = reg;
 	
-	reg_write(server, )
-    size_t bytes = read(server->new_socket, server->buffer, sizeof(server.buffer));
+	//reg_write(server, )
+    size_t bytes = read(server->new_socket, server->buffer, sizeof(server->buffer));
 		if(bytes == -1){
 			printk("Error read function \n");
 		}
@@ -128,7 +128,7 @@ static int reg_read(Server *server, int reg){
 			It initializes the input stream to read data from the server.buffer and bytes tells the stream
 			how many bytes it can read from the given buffer.  
 			*/
-			pb_istream_t stream = pb_istream_from_buffer(server.buffer, bytes);
+			pb_istream_t stream = pb_istream_from_buffer(server->buffer, bytes);
 
 			/*
 			pb_decode decodes the protobuf message from a serialized binary format.
