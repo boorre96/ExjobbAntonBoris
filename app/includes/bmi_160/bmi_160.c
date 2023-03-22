@@ -98,35 +98,3 @@ static int reg_read(int reg){
 
     return val;
 }
-
-/* 	switch (regn) {
-	case BMI160_REG_CHIPID:
-		LOG_INF("   * get chipid");
-		break;
-	case BMI160_REG_PMU_STATUS:
-		LOG_INF("   * get pmu");
-		val = data->pmu_status;
-		break;
-	case BMI160_REG_STATUS:
-		LOG_INF("   * status");
-		val |= BMI160_DATA_READY_BIT_MASK;
-		break;
-	case BMI160_REG_ACC_CONF:
-		LOG_INF("   * acc conf");
-		break;
-	case BMI160_REG_GYR_CONF:
-		LOG_INF("   * gyr conf");
-		break;
-	case BMI160_SPI_START:
-		LOG_INF("   * Bus start");
-		break;
-	case BMI160_REG_ACC_RANGE:
-		LOG_INF("   * acc range");
-		break;
-	case BMI160_REG_GYR_RANGE:
-		LOG_INF("   * gyr range");
-		break;
-	default:
-		LOG_INF("Unknown read %x", regn);
-	}
-	LOG_INF("       = %x", val); */
