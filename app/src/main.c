@@ -14,22 +14,27 @@
 #include <inttypes.h>
  
 #include <stdio.h>
-#include "../includes/bmi_160/bmi_160.c"
 
 // #include <zephyr/logging/log.h>
 
-// LOG_MODULE_REGISTER(debug_log);
+// // LOG_MODULE_REGISTER(debug_log);
+// LOG_MODULE_DECLARE(main_log);
+
+#include <zephyr/logging/log.h>
+
+#include "../includes/bmi_160/bmi_160.c"
 
 Server server;
 
 int main(void)
 {
+	LOG_MODULE_REGISTER(main_log, LOG_LEVEL_DBG);
 
-	
+	LOG_INF("Hello from main.c");
 
 	if(startWebsocket(&server)){
 		// reg_read(&server, 0);
-		// reg_write(&server, 0, 2);
+		reg_write(&server, 0, 2);
 		
 
 		/*Recieving a protobuf message from client*/
@@ -127,12 +132,11 @@ int main(void)
 		}
 		else{
 			if(send(server.new_socket, server.buffer, stream.bytes_written, 0) == -1){
-				printk("Failed to send to client! \n");
+				LOG_ERR("Error sending protobuf");
 			}
 			else{
-				// printk("Protobuf sent to client! \n");
 				LOG_INF("Protobuf reg %d sent.", regn);
-				reg_read(&server, regn);
+				// reg_read(&server, regn);
 			}
 		}
 		

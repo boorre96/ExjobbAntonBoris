@@ -3,6 +3,7 @@
 
 #include "../server.c"
 
+
 static void reg_write(Server *server, int reg, int val);
 static int reg_read(Server *server, int reg);
 

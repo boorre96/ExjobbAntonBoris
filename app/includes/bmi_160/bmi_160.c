@@ -9,12 +9,9 @@
 
 #include <zephyr/logging/log.h>
 
-LOG_MODULE_REGISTER(bmi160_log);
-
-
 // Register write
 static void reg_write(Server *server, int reg, int val){
-	printk("REG_WRITE \n");
+	LOG_INF("WRITE TO REG_WRITE");
 
 	/* 
 	1. Enter the values into the protobuf
@@ -45,14 +42,14 @@ static void reg_write(Server *server, int reg, int val){
 	
 
 	if(!pb_encode(&stream, SimpleMessage_fields, &message)){
-			printk("failed to encode... \n");
+			LOG_ERR("Encoding error");
 	}
 	else{
 		if(send(server->new_socket, server->buffer, stream.bytes_written, 0) == -1){
-				printk("Failed to send to client! \n");
+				LOG_ERR("Error sending protobuf");
 		}
 		else{
-				printk("Protobuf sent to client! \n");
+				LOG_DBG("Protobuf val %d sent.", message.val);
 		}
 	}
 		
