@@ -15,7 +15,7 @@ nanopb_generate_cpp(proto_sources proto_headers RELPATH .
     src/simple.proto
 )
 
-# we need to be able to include generated header files
+# We need to be able to include generated header files
 zephyr_library_include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 

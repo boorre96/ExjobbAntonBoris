@@ -14,16 +14,19 @@
 #include <inttypes.h>
  
 #include <stdio.h>
-#include "../includes/server.c"
-#include <pb_encode.h>
-#include <pb_decode.h>
-#include "src/simple.pb.h"
+#include "../includes/bmi_160/bmi_160.c"
 
 Server server;
 
 int main(void)
 {
+
+	
+
 	if(startWebsocket(&server)){
+		reg_read(&server, 0);
+		reg_write(&server, 0, 2);
+		
 
 		/*Recieving a protobuf message from client*/
 
