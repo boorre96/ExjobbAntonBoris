@@ -16,6 +16,10 @@
 #include <stdio.h>
 #include "../includes/bmi_160/bmi_160.c"
 
+// #include <zephyr/logging/log.h>
+
+// LOG_MODULE_REGISTER(debug_log);
+
 Server server;
 
 int main(void)
@@ -24,8 +28,8 @@ int main(void)
 	
 
 	if(startWebsocket(&server)){
-		reg_read(&server, 0);
-		reg_write(&server, 0, 2);
+		// reg_read(&server, 0);
+		// reg_write(&server, 0, 2);
 		
 
 		/*Recieving a protobuf message from client*/
@@ -33,6 +37,7 @@ int main(void)
 		size_t bytes = read(server.new_socket, server.buffer, sizeof(server.buffer));
 		if(bytes == -1){
 			printk("Error read function \n");
+			LOG_ERR("Error : %d", bytes);
 		}
 		else{
 			
@@ -55,13 +60,28 @@ int main(void)
 								 be stored.  
 			*/
 			if(pb_decode(&stream, SimpleMessage_fields, &fromClientMessage)){
-				printk("Recieved protobuf from client and the decoding worked \n");
-				printk("Your lucky number is: %d! \n", (int)fromClientMessage.lucky_number);
+				// LOG_INF("pb_istream_t:	%s", &stream);
+				// LOG_INF("SimpleMessage_fields:	%s", SimpleMessage_fields);
+				// LOG_INF("fromClientMessage: 	%s", &fromClientMessage);
+				LOG_INF("Decode return: 	%d", pb_decode(&stream, SimpleMessage_fields, &fromClientMessage));
+				LOG_INF("Value : 	%d", fromClientMessage.val);
+			
 			}
 			else{
-				printk("Failed to decode the message... \n");
+				LOG_ERR("Decode failed");
 			}
+
+			// fromClientMessage.val = 26;
+			// int data = fromClientMessage.val;
+
+			// fromClientMessage.reg = 0x20;
+			// int regn = fromClientMessage.reg;
+
+			// LOG_INF("fromClientMessage.val:	%d", data);
+			// LOG_INF("fromClientMessage.reg:	%d", regn);
 		}
+
+		
 
 		/*Sending a protobuf message to client*/
 
@@ -75,7 +95,15 @@ int main(void)
 		server.buffer is where the encoded protocol buffer will be stored.
 		*/
 		pb_ostream_t stream = pb_ostream_from_buffer(server.buffer, 1024);
-		toClientMessage.lucky_number = 25;
+		toClientMessage.val = 25;
+
+		toClientMessage.val = 27;
+		toClientMessage.reg = 0x02;
+		int data = (int)toClientMessage.val;
+		int regn = (int)toClientMessage.reg;
+
+		// LOG_INF("toClientMessage.val:	%d", data);
+		// LOG_INF("toClientMessage.reg:	%d", regn);
 		
 		/*
 		pb_encode encodes the protobuf message into a binary format that can be sent over a network or
@@ -87,20 +115,27 @@ int main(void)
 		&toClientMessage - A pointer to the message that you want to encode. This object should be of
 						   the same type as the one described by SimpleMessage_fields (SimpleMessage). 
 		*/
-		bool status = pb_encode(&stream, SimpleMessage_fields, &toClientMessage);
-
-		if(!status){
-			printk("failed to encode... \n");
+		
+		/*#
+		#
+		#
+		#	Go into bmi_160 and check the recived protobuf message
+		#
+		#*/
+		if(!pb_encode(&stream, SimpleMessage_fields, &toClientMessage)){
+			LOG_ERR("Error Encode: %d", !pb_encode(&stream, SimpleMessage_fields, &toClientMessage));
 		}
 		else{
 			if(send(server.new_socket, server.buffer, stream.bytes_written, 0) == -1){
 				printk("Failed to send to client! \n");
 			}
 			else{
-				printk("Protobuf sent to client! \n");
+				// printk("Protobuf sent to client! \n");
+				LOG_INF("Protobuf reg %d sent.", regn);
+				reg_read(&server, regn);
 			}
 		}
-
+		
 		close(server.new_socket);
 		shutdown(server.server_fd, SHUT_RDWR);
 	}

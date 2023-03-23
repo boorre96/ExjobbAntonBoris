@@ -22,7 +22,7 @@ static void reg_write(Server *server, int reg, int val){
 	3. Send the encoded protobuf through websocket
 	*/
 	SimpleMessage message = {0};
-	message.lucky_number = val;
+	message.val = val;
 
 	memset(server->buffer, 0, 1024);
 	/*
@@ -42,9 +42,9 @@ static void reg_write(Server *server, int reg, int val){
 		&toClientMessage - A pointer to the message that you want to encode. This object should be of
 						   the same type as the one described by SimpleMessage_fields (SimpleMessage). 
 		*/
-	bool status = pb_encode(&stream, SimpleMessage_fields, &message);
+	
 
-	if(!status){
+	if(!pb_encode(&stream, SimpleMessage_fields, &message)){
 			printk("failed to encode... \n");
 	}
 	else{
@@ -56,7 +56,7 @@ static void reg_write(Server *server, int reg, int val){
 		}
 	}
 		
-    printk("write %x = %x", reg, val);
+    printk("write %x = %x \n", reg, val);
 
     switch(reg){
         case BMI160_REG_ACC_CONF:
@@ -113,7 +113,7 @@ static int reg_read(Server *server, int reg){
 	5. Print what you got
 	*/
 	SimpleMessage message = {0};
-	message.lucky_number = reg;
+	message.reg = reg;
 	
 	//reg_write(server, )
     size_t bytes = read(server->new_socket, server->buffer, sizeof(server->buffer));
@@ -141,8 +141,8 @@ static int reg_read(Server *server, int reg){
 								 be stored.  
 			*/
 			if(pb_decode(&stream, SimpleMessage_fields, &fromClientMessage)){
-				printk("Recieved protobuf from client and the decoding worked \n");
-				printk("Your lucky number is: %d! \n", (int)fromClientMessage.lucky_number);
+				LOG_INF("Decode return: 	%d", pb_decode(&stream, SimpleMessage_fields, &fromClientMessage));
+				LOG_INF("Value : 	%d", fromClientMessage.val);
 			}
 			else{
 				printk("Failed to decode the message... \n");
@@ -153,28 +153,28 @@ static int reg_read(Server *server, int reg){
     int val;
     switch(reg){
         case BMI160_REG_CHIPID:
-            LOG_INF("   * get chipid");
+            LOG_INF(" %d	* get chipid", val);
             break;
         case BMI160_REG_PMU_STATUS:
-            LOG_INF("   * get pmu");
+            LOG_INF("	* get pmu");
             break;
         case BMI160_REG_STATUS:
-            LOG_INF("   * status");
+            LOG_INF("	* status");
             break;
         case BMI160_REG_ACC_CONF:
-            LOG_INF("   * acc conf");
+            LOG_INF("	* acc conf");
             break;
         case BMI160_REG_GYR_CONF:
-            LOG_INF("   * gyr conf");
+            LOG_INF("	* gyr conf");
             break;
         case BMI160_SPI_START:
-            LOG_INF("   * Bus start");
+            LOG_INF("	* Bus start");
             break;
         case BMI160_REG_ACC_RANGE:
-            LOG_INF("   * acc range");
+            LOG_INF("	* acc range");
             break;
         case BMI160_REG_GYR_RANGE:
-            LOG_INF("   * gyr range");
+            LOG_INF("	* gyr range");
             break;
         default:
             LOG_INF("Unknown read %x", reg);

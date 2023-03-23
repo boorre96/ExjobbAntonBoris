@@ -53,7 +53,7 @@ int clientSend(Client* client, const int number){
 
     pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
 
-    message.lucky_number = number;
+    message.val = number;
 
     bool status = pb_encode(&stream, SimpleMessage_fields, &message);
 
@@ -66,10 +66,13 @@ int clientSend(Client* client, const int number){
         return -1;
     }
 
-    printf("protobuf message sent \n");
+    printf("Protobuf message sent \n");
 
     return 1;
 }
+
+// Registret som det vill läsa ifrån här
+// Returnera data-värde på det register
 
 int clientReceive(Client* client, char* buffer, int size){
     
@@ -80,14 +83,16 @@ int clientReceive(Client* client, char* buffer, int size){
         printf("Receive failed \n");
     }
     else{
-        printf("Recieved protobuf from server! \n");
+        printf("Recieved protobuf %d bytes.\n", bytesReceived);
         /*Decode the protobuf*/
         SimpleMessage fromServerMessage = SimpleMessage_init_zero;
 		pb_istream_t stream = pb_istream_from_buffer(buffer, bytesReceived);
-
+        printf("Register to read from: %d \n", fromServerMessage.reg);
+        printf("Value from server: %d \n", fromServerMessage.val);
         if(pb_decode(&stream, SimpleMessage_fields, &fromServerMessage)){
-				printf("Recieved protobuf from client and the decoding worked \n");
-				printf("Your lucky number is: %d! \n", (int)fromServerMessage.lucky_number);
+                printf(".......Accepted........\n");
+				printf("Register to read from: %d \n", fromServerMessage.reg);
+                printf("Value from server: %d \n", fromServerMessage.val);
 		}
 		else{
 				printf("Failed to decode the message... \n");
