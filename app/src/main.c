@@ -25,13 +25,11 @@ LOG_MODULE_REGISTER(main_log, LOG_LEVEL_DBG);
 
 #include "../includes/bmi_160/bmi_160.c"
 
+
 Server server;
 
 int main(void)
 {
-
-	LOG_INF("Hello from main.c");
-
 	if(startWebsocket(&server)){
 		// reg_read(&server, 0);
 		reg_write(&server, 0, 2);
@@ -68,22 +66,13 @@ int main(void)
 				// LOG_INF("pb_istream_t:	%s", &stream);
 				// LOG_INF("SimpleMessage_fields:	%s", SimpleMessage_fields);
 				// LOG_INF("fromClientMessage: 	%s", &fromClientMessage);
-				LOG_INF("Decode return: 	%d", pb_decode(&stream, SimpleMessage_fields, &fromClientMessage));
-				LOG_INF("Value : 	%d", fromClientMessage.val);
+				LOG_DBG("Decode return: 	%d", pb_decode(&stream, SimpleMessage_fields, &fromClientMessage));
+				LOG_DBG("Value : 	%d", fromClientMessage.val);
 			
 			}
 			else{
 				LOG_ERR("Decode failed");
 			}
-
-			// fromClientMessage.val = 26;
-			// int data = fromClientMessage.val;
-
-			// fromClientMessage.reg = 0x20;
-			// int regn = fromClientMessage.reg;
-
-			// LOG_INF("fromClientMessage.val:	%d", data);
-			// LOG_INF("fromClientMessage.reg:	%d", regn);
 		}
 
 		
@@ -103,9 +92,9 @@ int main(void)
 		toClientMessage.val = 25;
 
 		toClientMessage.val = 27;
-		toClientMessage.reg = 0x02;
+		toClientMessage.reg = 0x03;
 		int data = (int)toClientMessage.val;
-		int regn = (int)toClientMessage.reg;
+		int reg = (int)toClientMessage.reg;
 
 		// LOG_INF("toClientMessage.val:	%d", data);
 		// LOG_INF("toClientMessage.reg:	%d", regn);
@@ -135,7 +124,8 @@ int main(void)
 				LOG_ERR("Error sending protobuf");
 			}
 			else{
-				LOG_INF("Protobuf reg %d sent.", regn);
+				LOG_WRN("Protobuf reg %d sent.", reg);
+				reg_read(&server, reg);
 				// reg_read(&server, regn);
 			}
 		}

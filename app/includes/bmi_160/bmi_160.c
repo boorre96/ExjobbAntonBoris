@@ -7,11 +7,11 @@
 #include "src/simple.pb.h"
 
 
-#include <zephyr/logging/log.h>
+
 
 // Register write
 static void reg_write(Server *server, int reg, int val){
-	LOG_INF("WRITE TO REG_WRITE");
+	LOG_WRN("WRITE TO REG_WRITE");
 
 	/* 
 	1. Enter the values into the protobuf
@@ -53,7 +53,7 @@ static void reg_write(Server *server, int reg, int val){
 		}
 	}
 		
-    printk("write %x = %x \n", reg, val);
+    LOG_WRN("write %x = %x \n", reg, val);
 
     switch(reg){
         case BMI160_REG_ACC_CONF:
@@ -101,7 +101,7 @@ static void reg_write(Server *server, int reg, int val){
 
 // Register read
 static int reg_read(Server *server, int reg){
-	
+	LOG_WRN("WRITE TO REG_WRITE");
 	/*
 	1. Enter the register number into protobuf
 	2. Encode the data
@@ -146,7 +146,7 @@ static int reg_read(Server *server, int reg){
 			}
 		}
 	
-	printk("Read %x = \n", reg);
+	LOG_WRN("Read %x = \n", reg);
     int val;
     switch(reg){
         case BMI160_REG_CHIPID:

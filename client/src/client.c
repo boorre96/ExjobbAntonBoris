@@ -46,8 +46,7 @@ int clientConnect(Client* client, const char* serverIp){
 
 int clientSend(Client* client, const int number){
     /*Sending a protobuf to server*/
-    printf("clientSend function \n");
-
+    
     SimpleMessage message = SimpleMessage_init_zero;
     uint8_t buffer[1024];
 
@@ -90,7 +89,7 @@ int clientReceive(Client* client, char* buffer, int size){
         printf("Register to read from: %d \n", fromServerMessage.reg);
         printf("Value from server: %d \n", fromServerMessage.val);
         if(pb_decode(&stream, SimpleMessage_fields, &fromServerMessage)){
-                printf(".......Accepted........\n");
+                printf("################    Accepted    ################\n");
 				printf("Register to read from: %d \n", fromServerMessage.reg);
                 printf("Value from server: %d \n", fromServerMessage.val);
 		}

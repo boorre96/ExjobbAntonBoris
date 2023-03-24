@@ -7,7 +7,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
-
+#include <zephyr/logging/log.h>
 
 
 #define PORT 8080
