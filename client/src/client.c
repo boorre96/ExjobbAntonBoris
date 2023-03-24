@@ -44,16 +44,15 @@ int clientConnect(Client* client, const char* serverIp){
     return 0;
 }
 
-int clientSend(Client* client, const int number){
+int clientSend(Client* client, const int value){
     /*Sending a protobuf to server*/
-    printf("clientSend function \n");
 
     SimpleMessage message = SimpleMessage_init_zero;
     uint8_t buffer[1024];
 
     pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
 
-    message.lucky_number = number;
+    message.val = value;
 
     bool status = pb_encode(&stream, SimpleMessage_fields, &message);
 
@@ -81,16 +80,36 @@ int clientReceive(Client* client, char* buffer, int size){
     }
     else{
         printf("Recieved protobuf from server! \n");
+        
         /*Decode the protobuf*/
-        SimpleMessage fromServerMessage = SimpleMessage_init_zero;
+
+        SimpleMessage fromServerMessage = {0};
 		pb_istream_t stream = pb_istream_from_buffer(buffer, bytesReceived);
 
         if(pb_decode(&stream, SimpleMessage_fields, &fromServerMessage)){
-				printf("Recieved protobuf from client and the decoding worked \n");
-				printf("Your lucky number is: %d! \n", (int)fromServerMessage.lucky_number);
+
+			printf("Decoding worked! \n");
+            printf("Your value is: %d, the registernumber is %d, the read value is %d \n", fromServerMessage.val, fromServerMessage.regNum, fromServerMessage.read);
+            if (fromServerMessage.val == 100)
+            {
+                return -1;
+            }
+            
+            else if(fromServerMessage.read == 1){
+                printf("FROM REG_READ \n");
+                printf("Sending value from register: %d back to server... \n", fromServerMessage.regNum);
+                clientSend(client, 10);
+            }
+            else if(fromServerMessage.read == 0){
+                printf("FROM REG_WRITE \n");
+                printf("Writing the value: %d into the register number: %d \n", fromServerMessage.val, fromServerMessage.regNum);
+            }
+            else{
+                printf("Wrong value in fromServerMessage... \n");
+            }
 		}
 		else{
-				printf("Failed to decode the message... \n");
+			printf("Failed to decode the message... \n");
 		}
     }
 
@@ -108,18 +127,14 @@ int main (void) {
 		return -1;
 	}
 
-	if(clientSend(&client, 2) == -1){
-		clientCleanup(&client);
-		return -1;
-	}
+    while(true){
 
+        if(clientReceive(&client, buffer, sizeof(buffer)) == -1){
+		    clientCleanup(&client);
+		    return false;
+	    }
+    }
 
-	if(clientReceive(&client, buffer, sizeof(buffer)) == -1){
-		clientCleanup(&client);
-		return -1;
-	}
-
-	printf("%s \n",buffer);
 
 	clientCleanup(&client);
 
