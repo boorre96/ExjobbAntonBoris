@@ -7,10 +7,6 @@
 #include "src/simple.pb.h"
 
 
-#include <zephyr/logging/log.h>
-
-LOG_MODULE_REGISTER(bmi160_log);
-
 int encode(SimpleMessage *message, Server *server){
 
 	/*
@@ -66,17 +62,17 @@ int decode(SimpleMessage *message, Server *server, int bytesFromClient){
 	*/
 
 	if(pb_decode(&stream, SimpleMessage_fields, message)){
-		printk("Decoding worked... \n");
+		LOG_WRN("Decoding worked");
 		return 1;
 	}
 	else{
-		printk("Failed to decode the message... \n");
+		LOG_ERR("Failed to decode the message");
 		return 0;
 	}
 
 }
 static void reg_write(Server *server, int reg, int val){
-	printk("REG_WRITE \n");
+	LOG_WRN("REG_WRITE");
 
 	SimpleMessage message = {0};
 	message.val = val;
@@ -86,18 +82,18 @@ static void reg_write(Server *server, int reg, int val){
 	memset(server->buffer, 0, 1024);
 
 	if((bytesToSend = encode(&message, server)) == -1){
-		printk("Error in encode function... \n");
+		LOG_ERR("Encode error");
 	}
 	else{
 		if(send(server->new_socket, server->buffer, bytesToSend, 0) == -1){
-			printk("Send to client failed... \n");
+			LOG_ERR("Unable to send to client");
 		}
 		else{
-			printk("Protobuf sent to client! \n");
+			LOG_WRN("Protobuf sent to client");
 		}
 	}
 		
-    printk("write %x = %x \n", reg, val);
+    LOG_DBG("write %x = %x \n", reg, val);
 
     switch(reg){
         case BMI160_REG_ACC_CONF:
@@ -145,6 +141,7 @@ static void reg_write(Server *server, int reg, int val){
 
 // Register read
 static int reg_read(Server *server, int reg){
+	LOG_ERR("REG_READ");
 	
 	//
 	SimpleMessage message = {0};
@@ -154,36 +151,36 @@ static int reg_read(Server *server, int reg){
 	SimpleMessage messageFromClient = {0};
 	
 	if((bytesToSend = encode(&message, server)) == -1){
-		printk("Error in encode function... \n");
+		LOG_ERR("Encode error");
 	}
 	else{
 		if(send(server->new_socket, server->buffer, bytesToSend, 0) == -1){
-			printk("Send to client failed... \n");
+			LOG_ERR("Unable to send to client");
 		}
 		else{
-			printk("Protobuf sent to client! \n");
+			LOG_WRN("Protobuf sent to client");
 		}
 	}
 	
     size_t bytes = read(server->new_socket, server->buffer, sizeof(server->buffer));
 		if(bytes == -1){
-			printk("Error read function \n");
+			LOG_ERR("Read error");
 		}
 		else{
-			printk("Message from client read successfully... \n");
+			LOG_INF("Message read successfully");
 			
 			
 
 			if(!decode(&messageFromClient, server, bytes)){
-				printk("Error in decode function... \n");
+				LOG_ERR("Decode error");
 			}
 			else{
-				printk("Value is: %d!", messageFromClient.val);
+				LOG_DBG("Value is: %d", messageFromClient.val);
 			}
 		}
 	
-	printk("Read %x = \n", reg);
-    int val = messageFromClient.val;
+	LOG_DBG("Read %x = \n", reg);
+    int val;
     switch(reg){
         case BMI160_REG_CHIPID:
             LOG_INF("   * get chipid");
