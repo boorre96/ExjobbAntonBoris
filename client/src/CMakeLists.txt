@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.13.1)
 
+# Include Zephyr base
+
 project(client C)
 
 # Set path to nanopb library
@@ -18,12 +20,6 @@ include_directories("$ENV{HOME}/Thesis/my-workspace/ExjobbAntonBoris/build/src")
 
 #$ENV{HOME}/Thesis/my-workspace/ExjobbAntonBoris/build/src
 
-
-# Include emul_bmi160
-
-
-
-#include_directories(EMUL_BMI160 "/home/anton-dev/Thesis/my-workspace/zephyr/drivers/sensor/bmi160")
 
 # Add nanopb source code
 set(NANOPB_SRC
@@ -44,6 +40,11 @@ add_custom_command(
           --nanopb_out=${PROTOBUF_DIR} ${PROTOBUF_DIR}/simple.proto
   DEPENDS ${PROTOBUF_DIR}/simple.proto
 )
+
+# Include Zephyr log_module_register
+
+# target_include_directories(nanopb PRIVATE "/home/anton-dev/Thesis/my-workspace/zephyr/subsys/logging")
+# target_sources(nanopb PRIVATE "/home/anton-dev/Thesis/my-workspace/zephyr/subsys/logging/log_core.c")
 
 # Add client executable
 add_executable(client client.c ${PROTOBUF_DIR}/simple.pb.c)
