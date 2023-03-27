@@ -6,6 +6,7 @@
 #include <pb_encode.h>
 #include <pb_decode.h>
 #include "simple.pb.h"
+#include "../includes/bmi_160/register.h"
 
 void clientInit(Client* client){
     client->clientFd = -1;
@@ -87,7 +88,7 @@ int clientReceive(Client* client, char* buffer, int size){
 
         SimpleMessage fromServerMessage = {0};
 		pb_istream_t stream = pb_istream_from_buffer(buffer, bytesReceived);
-        printf("Register to read from: %d \n", fromServerMessage.reg);
+        printf("Register to read from: %d \n", fromServerMessage.regNum);
         printf("Value from server: %d \n", fromServerMessage.val);
         if(pb_decode(&stream, SimpleMessage_fields, &fromServerMessage)){
 
@@ -101,6 +102,7 @@ int clientReceive(Client* client, char* buffer, int size){
             else if(fromServerMessage.read == 1){
                 printf("FROM REG_READ \n");
                 printf("Sending value from register: %d back to server... \n", fromServerMessage.regNum);
+                printf("Test: %d\n", BMI160_REG_ERR);
                 clientSend(client, 10);
             }
             else if(fromServerMessage.read == 0){

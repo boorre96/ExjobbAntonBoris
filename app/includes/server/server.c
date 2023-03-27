@@ -14,13 +14,13 @@ int createSocket(Server *server)
 {
     server->server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server->server_fd < 0){
-		LOG_ERR("Socket %d failed. \n", server->server_fd);
+		//LOG_ERR("Socket %d failed. \n", server->server_fd);
  		exit(EXIT_FAILURE);
 		return 0;
 	}
 	else{
 		printk("Socket %d created. \n", server->server_fd);
-		LOG_INF("Socket %d created. \n", server->server_fd);
+		//LOG_INF("Socket %d created. \n", server->server_fd);
 		return 1;
 	}
 }
@@ -34,12 +34,13 @@ int createSocket(Server *server)
 
 int bindSocket(Server *server){
 	if (bind(server->server_fd, (struct sockaddr*)&server->address,sizeof(server->address))< 0) {
-		LOG_ERR("Socket: %d failed. \n", &server->address);
+		//LOG_ERR("Socket: %d failed. \n", &server->address);
  		exit(EXIT_FAILURE);
 		return 0;
  	}
 	else{
-		LOG_INF("Socket: %d accepted. \n", &server->address);
+		//LOG_INF("Socket: %d accepted. \n", &server->address);
+		printk("Socket: %d accepted. \n", server->address);
 		return 1;
 	}
 }
@@ -53,11 +54,11 @@ int bindSocket(Server *server){
 
 void startListening(Server *server){
 	if (listen(server->server_fd, 3) < 0) {
-		LOG_ERR("Server %d not listening. \n", server->server_fd);
+		//LOG_ERR("Server %d not listening. \n", server->server_fd);
  		exit(EXIT_FAILURE);
  	}
 	else{
-		LOG_INF("Server %d is listening. \n", server->server_fd);
+		printk("Server %d is listening. \n", server->server_fd);
 	}
 }
 
@@ -71,12 +72,12 @@ void startListening(Server *server){
 
 int acceptConnection(Server *server){
 	if ((server->new_socket = accept(server->server_fd,(struct sockaddr*)&server->address,(socklen_t*)&server->addrlen))< 0) {	
-		LOG_ERR("New socket %d not accepted. \n", server->new_socket);
+		//LOG_ERR("New socket %d not accepted. \n", server->new_socket);
  		exit(EXIT_FAILURE);
 		return 0;
  	}
 	else{
-		LOG_INF("New socket %d accepted. \n", server->new_socket);
+		printk("New socket %d accepted. \n", server->new_socket);
 		return 1;
 	}
 }
@@ -99,12 +100,12 @@ void handleMessages(Server *server){
 */
 void initiateSocket(Server *server){
 	if (setsockopt(server->server_fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEADDR, &server->opt,sizeof(server->opt))) {
-		LOG_ERR("Socket %d not initated. \n", server->server_fd);
+		//LOG_ERR("Socket %d not initated. \n", server->server_fd);
  		perror("setsockopt");
  		exit(EXIT_FAILURE);
  	}
 	else{
-		LOG_INF("Socket %d initiated. \n", server->server_fd);
+		printk("Socket %d initiated. \n", server->server_fd);
 		server->address.sin_family = AF_INET;
 		server->address.sin_addr.s_addr = INADDR_ANY;
 		server->address.sin_port = htons(8080);
