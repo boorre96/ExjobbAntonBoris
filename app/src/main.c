@@ -21,20 +21,20 @@ LOG_MODULE_REGISTER(main_log, LOG_LEVEL_DBG);
 #include "../includes/bmi_160/bmi_160.c"
 
 Server server;
-int main(void)
-{
+char s;
+
+int main(void){
 	
 	if(startWebsocket(&server)){
-		LOG_WRN("Press 'y to start websocket");
-		char s;
 		while (true) 
 		{
+			LOG_WRN("Enter 'w' to write, 'r' to read and any other button to close socket");
 			scanf(" %c", &s);
 			if(s == 'w'){
-				reg_write(&server, 5, 6);
+				reg_write(&server, 0x05, 6);
 			}
 			else if(s == 'r'){
-				reg_read(&server, 0);
+				reg_read(&server, 0x00);
 			}
 			else{
 				reg_write(&server, 5, 100);

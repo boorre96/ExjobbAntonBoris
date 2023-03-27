@@ -7,6 +7,8 @@
 #include "src/simple.pb.h"
 
 
+
+
 int encode(SimpleMessage *message, Server *server){
 
 	/*
@@ -30,11 +32,13 @@ int encode(SimpleMessage *message, Server *server){
 		*/
 
 	if(!pb_encode(&stream, SimpleMessage_fields, message)){
-		printk("failed to encode... \n");
+		LOG_ERR("Encode failed.");
+		//printk("failed to encode... \n");
 		return -1;
 	}
 	else{
-		printk("Encoding worked.. \n");
+		LOG_WRN("Encoding worked.");
+		//printk("Encoding worked.. \n");
 		return stream.bytes_written;;
 	}
 
@@ -138,7 +142,6 @@ static void reg_write(Server *server, int reg, int val){
             }
     }
 }
-
 // Register read
 static int reg_read(Server *server, int reg){
 	LOG_ERR("REG_READ");
@@ -179,8 +182,8 @@ static int reg_read(Server *server, int reg){
 			}
 		}
 	
-	LOG_DBG("Read %x = \n", reg);
-    int val;
+	LOG_DBG("Read %x = ", reg);
+    int val = messageFromClient.val;
     switch(reg){
         case BMI160_REG_CHIPID:
             LOG_INF("   * get chipid");
