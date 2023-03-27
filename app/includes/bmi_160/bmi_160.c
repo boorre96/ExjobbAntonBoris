@@ -7,6 +7,7 @@
 #include "src/simple.pb.h"
 
 
+#include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(bmi160_log);
 
@@ -31,18 +32,18 @@ int encode(SimpleMessage *message, Server *server){
 		&toClientMessage - A pointer to the message that you want to encode. This object should be of
 						   the same type as the one described by SimpleMessage_fields (SimpleMessage). 
 		*/
-	
 
 	if(!pb_encode(&stream, SimpleMessage_fields, message)){
-			LOG_ERR("Encoding error");
-			return -1;
+		printk("failed to encode... \n");
+		return -1;
 	}
 	else{
-		LOG_WRN("Encoding worked");
-		return stream.bytes_written;
+		printk("Encoding worked.. \n");
+		return stream.bytes_written;;
 	}
-}
 
+
+}
 int decode(SimpleMessage *message, Server *server, int bytesFromClient){
 
 	/*
@@ -65,11 +66,11 @@ int decode(SimpleMessage *message, Server *server, int bytesFromClient){
 	*/
 
 	if(pb_decode(&stream, SimpleMessage_fields, message)){
-		LOG_ERR("Decoding worked");
+		printk("Decoding worked... \n");
 		return 1;
 	}
 	else{
-		LOG_WRN("Failed to decode the message");
+		printk("Failed to decode the message... \n");
 		return 0;
 	}
 
@@ -80,7 +81,7 @@ static void reg_write(Server *server, int reg, int val){
 	SimpleMessage message = {0};
 	message.val = val;
 	message.regNum = reg;
-	message.read = 0;
+	message.read = 1;
 
 	memset(server->buffer, 0, 1024);
 
@@ -145,9 +146,12 @@ static void reg_write(Server *server, int reg, int val){
 // Register read
 static int reg_read(Server *server, int reg){
 	
+	//
 	SimpleMessage message = {0};
 	message.regNum = reg;
-	message.read = 1;
+	message.read = 2;
+
+	SimpleMessage messageFromClient = {0};
 	
 	if((bytesToSend = encode(&message, server)) == -1){
 		printk("Error in encode function... \n");
@@ -168,7 +172,7 @@ static int reg_read(Server *server, int reg){
 		else{
 			printk("Message from client read successfully... \n");
 			
-			SimpleMessage messageFromClient = {0};
+			
 
 			if(!decode(&messageFromClient, server, bytes)){
 				printk("Error in decode function... \n");
@@ -179,7 +183,7 @@ static int reg_read(Server *server, int reg){
 		}
 	
 	printk("Read %x = \n", reg);
-    int val;
+    int val = messageFromClient.val;
     switch(reg){
         case BMI160_REG_CHIPID:
             LOG_INF("   * get chipid");

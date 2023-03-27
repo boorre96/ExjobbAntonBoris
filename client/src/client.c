@@ -45,18 +45,20 @@ int clientConnect(Client* client, const char* serverIp){
     return 0;
 }
 
+/*Sending a protobuf to server*/
 int clientSend(Client* client, const int value){
-    /*Sending a protobuf to server*/
-    SimpleMessage message = SimpleMessage_init_zero;
+
+    /* Instantiates an empty protobuf and insert "value" into the protobuf */
+    SimpleMessage message = {0};
+    message.val = value;
+    
+    /* Create a buffer which will store the encoded message */
     uint8_t buffer[1024];
 
+    /* Creates a Protocol Buffers output stream object, named 'stream', by initializing it with a given buffer and its corresponding size */
     pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
 
-    message.val = value;
-
-    bool status = pb_encode(&stream, SimpleMessage_fields, &message);
-
-    if(!status){
+    if(!pb_encode(&stream, SimpleMessage_fields, &message)){
         printf("The encoding didn't work! \n");
         return 0;
     }
@@ -70,8 +72,6 @@ int clientSend(Client* client, const int value){
     return 1;
 }
 
-// Registret som det vill läsa ifrån här
-// Returnera data-värde på det register
 
 int clientReceive(Client* client, char* buffer, int size){
     
@@ -86,31 +86,28 @@ int clientReceive(Client* client, char* buffer, int size){
         
         /*Decode the protobuf*/
 
+        /* Instantiates an empty protobuf */
         SimpleMessage fromServerMessage = {0};
+
 		pb_istream_t stream = pb_istream_from_buffer(buffer, bytesReceived);
-        printf("Register to read from: %d \n", fromServerMessage.regNum);
-        printf("Value from server: %d \n", fromServerMessage.val);
+        
         if(pb_decode(&stream, SimpleMessage_fields, &fromServerMessage)){
 
 			printf("Decoding worked! \n");
-            printf("Your value is: %d, the registernumber is %d, the read value is %d \n", fromServerMessage.val, fromServerMessage.regNum, fromServerMessage.read);
-            if (fromServerMessage.val == 100)
-            {
-                return -1;
-            }
             
-            else if(fromServerMessage.read == 1){
+            if(fromServerMessage.read == 2){
                 printf("FROM REG_READ \n");
                 printf("Sending value from register: %d back to server... \n", fromServerMessage.regNum);
                 printf("Test: %d\n", BMI160_REG_ERR);
                 clientSend(client, 10);
             }
-            else if(fromServerMessage.read == 0){
+            else if(fromServerMessage.read == 1){
                 printf("FROM REG_WRITE \n");
                 printf("Writing the value: %d into the register number: %d \n", fromServerMessage.val, fromServerMessage.regNum);
             }
             else{
                 printf("Wrong value in fromServerMessage... \n");
+                return -1;
             }
 		}
 		else{
