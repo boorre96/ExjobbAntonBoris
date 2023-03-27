@@ -14,7 +14,17 @@
 #include <inttypes.h>
  
 #include <stdio.h>
+
+// #include <zephyr/logging/log.h>
+
+// // LOG_MODULE_REGISTER(debug_log);
+// LOG_MODULE_DECLARE(main_log);
+
+#include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(main_log, LOG_LEVEL_DBG);
+
 #include "../includes/bmi_160/bmi_160.c"
+
 
 Server server;
 int main(void)

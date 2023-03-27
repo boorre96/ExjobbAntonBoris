@@ -14,13 +14,13 @@ int createSocket(Server *server)
 {
     server->server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server->server_fd < 0){
-		printk("Dosent create Socket... \n");
-		perror("socket failed");
+		LOG_ERR("Socket %d failed. \n", server->server_fd);
  		exit(EXIT_FAILURE);
 		return 0;
 	}
 	else{
-		printk("Created Socket... \n");
+		printk("Socket %d created. \n", server->server_fd);
+		LOG_INF("Socket %d created. \n", server->server_fd);
 		return 1;
 	}
 }
@@ -34,13 +34,12 @@ int createSocket(Server *server)
 
 int bindSocket(Server *server){
 	if (bind(server->server_fd, (struct sockaddr*)&server->address,sizeof(server->address))< 0) {
-		printk("Dosent bind... \n");
- 		perror("bind failed");
+		LOG_ERR("Socket: %d failed. \n", &server->address);
  		exit(EXIT_FAILURE);
 		return 0;
  	}
 	else{
-		printk("Binding socket successfuly... \n");
+		LOG_INF("Socket: %d accepted. \n", &server->address);
 		return 1;
 	}
 }
@@ -54,12 +53,11 @@ int bindSocket(Server *server){
 
 void startListening(Server *server){
 	if (listen(server->server_fd, 3) < 0) {
-		printk("Dosent listen... \n");
- 		perror("listen");
+		LOG_ERR("Server %d not listening. \n", server->server_fd);
  		exit(EXIT_FAILURE);
  	}
 	else{
-		printk("Server is listening... \n");
+		LOG_INF("Server %d is listening. \n", server->server_fd);
 	}
 }
 
@@ -72,20 +70,18 @@ void startListening(Server *server){
 */ 	
 
 int acceptConnection(Server *server){
-	printk("Waiting for client... \n");
 	if ((server->new_socket = accept(server->server_fd,(struct sockaddr*)&server->address,(socklen_t*)&server->addrlen))< 0) {	
-		printk("Dosent accept... \n");
- 		perror("accept");
+		LOG_ERR("New socket %d not accepted. \n", server->new_socket);
  		exit(EXIT_FAILURE);
 		return 0;
  	}
 	else{
-		printk("Client connected... \n");
+		LOG_INF("New socket %d accepted. \n", server->new_socket);
 		return 1;
 	}
 }
 
- 
+/*  
 void handleMessages(Server *server){
 	while (1)
  	{ 		
@@ -95,7 +91,7 @@ void handleMessages(Server *server){
  		send(server->new_socket, test, strlen(test), 0);
  		printf("Hello message sent\n");
  	}
-}
+} */
 
 /* 	Forcefully attaching socket to the port 8080
  	This helps in manipulating options for the socket referred by the file descriptor sockfd. 
@@ -103,12 +99,12 @@ void handleMessages(Server *server){
 */
 void initiateSocket(Server *server){
 	if (setsockopt(server->server_fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEADDR, &server->opt,sizeof(server->opt))) {
-		printk("Dosent initiate socket... \n");
+		LOG_ERR("Socket %d not initated. \n", server->server_fd);
  		perror("setsockopt");
  		exit(EXIT_FAILURE);
  	}
 	else{
-		printk("Initiated Socket Successfully... \n");
+		LOG_INF("Socket %d initiated. \n", server->server_fd);
 		server->address.sin_family = AF_INET;
 		server->address.sin_addr.s_addr = INADDR_ANY;
 		server->address.sin_port = htons(8080);

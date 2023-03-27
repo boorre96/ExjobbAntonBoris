@@ -7,7 +7,6 @@
 #include "src/simple.pb.h"
 
 
-#include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(bmi160_log);
 
@@ -32,18 +31,18 @@ int encode(SimpleMessage *message, Server *server){
 		&toClientMessage - A pointer to the message that you want to encode. This object should be of
 						   the same type as the one described by SimpleMessage_fields (SimpleMessage). 
 		*/
+	
 
 	if(!pb_encode(&stream, SimpleMessage_fields, message)){
-		printk("failed to encode... \n");
-		return -1;
+			LOG_ERR("Encoding error");
+			return -1;
 	}
 	else{
-		printk("Encoding worked.. \n");
-		return stream.bytes_written;;
+		LOG_WRN("Encoding worked");
+		return stream.bytes_written;
 	}
-
-
 }
+
 int decode(SimpleMessage *message, Server *server, int bytesFromClient){
 
 	/*
@@ -66,18 +65,15 @@ int decode(SimpleMessage *message, Server *server, int bytesFromClient){
 	*/
 
 	if(pb_decode(&stream, SimpleMessage_fields, message)){
-		printk("Decoding worked... \n");
+		LOG_ERR("Decoding worked");
 		return 1;
 	}
 	else{
-		printk("Failed to decode the message... \n");
+		LOG_WRN("Failed to decode the message");
 		return 0;
 	}
 
 }
-
-
-// Register write
 static void reg_write(Server *server, int reg, int val){
 	printk("REG_WRITE \n");
 

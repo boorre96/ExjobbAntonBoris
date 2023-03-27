@@ -46,7 +46,6 @@ int clientConnect(Client* client, const char* serverIp){
 
 int clientSend(Client* client, const int value){
     /*Sending a protobuf to server*/
-
     SimpleMessage message = SimpleMessage_init_zero;
     uint8_t buffer[1024];
 
@@ -65,10 +64,13 @@ int clientSend(Client* client, const int value){
         return -1;
     }
 
-    printf("protobuf message sent \n");
+    printf("Protobuf message sent \n");
 
     return 1;
 }
+
+// Registret som det vill läsa ifrån här
+// Returnera data-värde på det register
 
 int clientReceive(Client* client, char* buffer, int size){
     
@@ -85,7 +87,8 @@ int clientReceive(Client* client, char* buffer, int size){
 
         SimpleMessage fromServerMessage = {0};
 		pb_istream_t stream = pb_istream_from_buffer(buffer, bytesReceived);
-
+        printf("Register to read from: %d \n", fromServerMessage.reg);
+        printf("Value from server: %d \n", fromServerMessage.val);
         if(pb_decode(&stream, SimpleMessage_fields, &fromServerMessage)){
 
 			printf("Decoding worked! \n");
