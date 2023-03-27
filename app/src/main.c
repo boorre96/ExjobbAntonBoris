@@ -20,9 +20,6 @@ LOG_MODULE_REGISTER(main_log, LOG_LEVEL_DBG);
 
 #include "../includes/bmi_160/bmi_160.c"
 
-
-
-
 Server server;
 int main(void)
 {
