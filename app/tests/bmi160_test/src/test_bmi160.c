@@ -38,13 +38,16 @@ static void test_reg_write(void){
     // Test case 1: Writing to BMI160_REG_ACC_CONF
     int reg1 = BMI160_REG_ACC_CONF;
     int val1 = 0x1234;
-
+    size_t bytes = read(&test_server.new_socket, &test_server.buffer, sizeof(&server.buffer));
     //SimpleMessage - check that these messages is equal to reg1 and val1
 /* 
     reg_write(&test_server, , val1);
  */
    // zassert_equal(&test_server)
-
+    // SimpleMessage msg = {0};
+    // reg_write(&test_server, 0x00, 24);
+    // decode(&msg, &test_server, bytes);
+    // printk("SimpleMessage val = %d \n", msg.val);
 }
 
 static void test_reg_read(void){
