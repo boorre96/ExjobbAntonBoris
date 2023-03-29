@@ -6,9 +6,6 @@
 #include <pb_decode.h>
 #include "src/simple.pb.h"
 
-
-
-
 int encode(SimpleMessage *message, Server *server){
 
 	/*
@@ -135,9 +132,6 @@ static void reg_write(Server *server, int reg, int val){
                             shift = BMI160_PMU_STATUS_MAG_POS;
                             break;
                         }
-                        /*
-                        *write over
-                        */
                     }
             }
     }
@@ -168,6 +162,7 @@ static int reg_read(Server *server, int reg){
     size_t bytes = read(server->new_socket, server->buffer, sizeof(server->buffer));
 		if(bytes == -1){
 			LOG_ERR("Read error");
+			return -1;
 		}
 		else{
 			LOG_INF("Message read successfully");
@@ -176,6 +171,7 @@ static int reg_read(Server *server, int reg){
 
 			if(!decode(&messageFromClient, server, bytes)){
 				LOG_ERR("Decode error");
+				return -1;
 			}
 			else{
 				LOG_DBG("Value is: %d", messageFromClient.val);
