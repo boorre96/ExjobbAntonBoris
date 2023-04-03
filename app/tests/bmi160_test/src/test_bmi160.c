@@ -33,21 +33,22 @@ static void websocket_test(void){
 }
 
 static void test_reg_write(void){
-    Server test_server;
+    // Test case 1 - BMI160_REG_ACC_CONF
+    zassert(reg_write(&server, BMI160_REG_ACC_CONF, 10), "Test case 1");
 
-    // Test case 1: Writing to BMI160_REG_ACC_CONF
-    int reg1 = BMI160_REG_ACC_CONF;
-    int val1 = 0x1234;
-    size_t bytes = read(&test_server.new_socket, &test_server.buffer, sizeof(&server.buffer));
-    //SimpleMessage - check that these messages is equal to reg1 and val1
-/* 
-    reg_write(&test_server, , val1);
- */
-   // zassert_equal(&test_server)
-    // SimpleMessage msg = {0};
-    // reg_write(&test_server, 0x00, 24);
-    // decode(&msg, &test_server, bytes);
-    // printk("SimpleMessage val = %d \n", msg.val);
+    // Test case 2 - BMI160_REG_ACC_RANGE  
+    zassert(reg_write(&server, BMI160_REG_ACC_RANGE, 10), "Test case 2"); 
+
+    // Test case 3 - BMI160_REG_GYR_CONF
+    zassert(reg_write(&server, BMI160_REG_GYR_CONF, 10), "Test case 3");
+
+    // Test case 4 - BMI160_REG_GYR_RANGE
+    zassert(reg_write(&server, BMI160_REG_GYR_RANGE, 10), "Test case 4");
+
+    // Test case 5 - BMI160_REG_CMD
+    zassert(reg_write(&server, BMI160_REG_CMD, 10), "Test case 5");
+
+
 }
 
 static void test_reg_read(void){
@@ -63,15 +64,3 @@ ztest_test_suite(bmi160_simple_tests,
 void test_main(void){
     ztest_run_test_suite(bmi160_simple_tests);
 }
-
-/* static bool log_contains(const char *str){
-    const struct log_output *output = log_output_list_head_get();
-    const struct log_output *output_end = log_output_list_tail_get();
-
-    while(output != output_end){
-        struct log_msg *msg;
-        msg = log_msg_get(output, true);
-
-        while(msg)
-    }
-} */

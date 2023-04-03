@@ -72,7 +72,7 @@ int decode(SimpleMessage *message, Server *server, int bytesFromClient){
 	}
 
 }
-static void reg_write(Server *server, int reg, int val){
+static bool reg_write(Server *server, int reg, int val){
 	LOG_WRN("REG_WRITE");
 
 	SimpleMessage message = {0};
@@ -84,15 +84,16 @@ static void reg_write(Server *server, int reg, int val){
 
 	if((bytesToSend = encode(&message, server)) == -1){
 		LOG_ERR("Encode error");
+		return false;
 	}
-	else{
-		if(send(server->new_socket, server->buffer, bytesToSend, 0) == -1){
-			LOG_ERR("Unable to send to client");
-		}
-		else{
-			LOG_WRN("Protobuf sent to client");
-		}
+	
+	if(send(server->new_socket, server->buffer, bytesToSend, 0) == -1){
+		LOG_ERR("Unable to send to client");
+		return false;
 	}
+
+	LOG_WRN("Protobuf sent to client");
+
 		
     LOG_DBG("write %x = %x \n", reg, val);
 
@@ -135,6 +136,7 @@ static void reg_write(Server *server, int reg, int val){
                     }
             }
     }
+	return true;
 }
 // Register read
 static int reg_read(Server *server, int reg){
