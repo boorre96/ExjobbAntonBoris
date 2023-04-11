@@ -1,2 +1,0 @@
-# Hashes of file build rules.
-b6340dc1e787beab1a1b40f30ae29c2c /home/anton-dev/Thesis/my-workspace/ExjobbAntonBoris/app/src/simple.pb.c

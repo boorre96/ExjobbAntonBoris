@@ -28,7 +28,7 @@ static void websocket_test(void){
 
    // Initiate websocket server
    int ws = setup_websocket_server(&server);
-   zassert_true(ws, "Could not start socket.");
+   zassert_true(ws, "Failed to Initiate WebSocket.");
 
 }
 
