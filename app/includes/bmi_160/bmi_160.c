@@ -73,7 +73,7 @@ int decode(SimpleMessage *message, Server *server, int bytesFromClient){
 
 }
 static bool reg_write(Server *server, int reg, int val){
-	LOG_WRN("REG_WRITE");
+	LOG_INF("REG_WRITE");
 
 	SimpleMessage message = {0};
 	message.val = val;
@@ -92,23 +92,24 @@ static bool reg_write(Server *server, int reg, int val){
 		return false;
 	}
 
-	LOG_WRN("Protobuf sent to client");
+	LOG_DBG("Protobuf sent to client");
 
 		
-    LOG_DBG("write %x = %x \n", reg, val);
+    //LOG_DBG("write %x = %x \n", reg, val);
+	LOG_DBG("write value: %d to register: 0x%x", val, reg);
 
     switch(reg){
         case BMI160_REG_ACC_CONF:
-            LOG_INF("   * acc conf");
+            LOG_INF("0x%x register name = acc conf ", reg);
             break;
         case BMI160_REG_ACC_RANGE:
-            LOG_INF("   * acc range");
-            break;
+			LOG_INF("0x%x register name = acc range ", reg);
+			break;
         case BMI160_REG_GYR_CONF:
-            LOG_INF("   * gyr conf");
+			LOG_INF("0x%x register name = gyr conf ", reg);
             break;
         case BMI160_REG_GYR_RANGE:
-            LOG_INF("   * gyr range");
+			LOG_INF("0x%x register name = gyr range \n", reg);
             break;
         case BMI160_REG_CMD:
             switch(val){
@@ -140,7 +141,7 @@ static bool reg_write(Server *server, int reg, int val){
 }
 // Register read
 static int reg_read(Server *server, int reg){
-	LOG_ERR("REG_READ");
+	LOG_INF("REG_READ");
 	
 	//
 	SimpleMessage message = {0};
@@ -179,33 +180,33 @@ static int reg_read(Server *server, int reg){
 				LOG_DBG("Value is: %d", messageFromClient.val);
 			}
 		}
-	
-	LOG_DBG("Read %x = ", reg);
+
+	LOG_DBG("Read register: 0x%x", reg);
     int val = messageFromClient.val;
     switch(reg){
         case BMI160_REG_CHIPID:
-            LOG_INF("   * get chipid");
+			LOG_INF("0x%x register name = chip id ", reg);
             break;
         case BMI160_REG_PMU_STATUS:
-            LOG_INF("   * get pmu");
+			LOG_INF("0x%x register name = pmu status ", reg);
             break;
         case BMI160_REG_STATUS:
-            LOG_INF("   * status");
+			LOG_INF("0x%x register name = status ", reg);
             break;
         case BMI160_REG_ACC_CONF:
-            LOG_INF("   * acc conf");
+			LOG_INF("0x%x register name = acc conf ", reg);
             break;
         case BMI160_REG_GYR_CONF:
-            LOG_INF("   * gyr conf");
+			LOG_INF("0x%x register name = gyr conf ", reg);
             break;
         case BMI160_SPI_START:
-            LOG_INF("   * Bus start");
+			LOG_INF("0x%x register name = spi start ", reg);
             break;
         case BMI160_REG_ACC_RANGE:
-            LOG_INF("   * acc range");
+			LOG_INF("0x%x register name = acc range ", reg);
             break;
         case BMI160_REG_GYR_RANGE:
-            LOG_INF("   * gyr range");
+			LOG_INF("0x%x register name = gyr range ", reg);
             break;
         default:
             LOG_INF("Unknown read %x", reg);
