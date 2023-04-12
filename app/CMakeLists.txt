@@ -7,7 +7,7 @@
 cmake_minimum_required(VERSION 3.13.1)
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
-#project(app LANGUAGES C VERSION 1.0.0)
+# Project build
 project(app)
 
 # From nanopb
@@ -22,4 +22,14 @@ zephyr_library_include_directories(${CMAKE_CURRENT_BINARY_DIR})
 configure_file(app_version.h.in ${CMAKE_BINARY_DIR}/app/include/app_version.h)
 target_include_directories(app PRIVATE ${CMAKE_BINARY_DIR}/app/include src)
 
-target_sources(app PRIVATE ${proto_sources} src/main.c)
+
+if(CONFIG_ZTEST)
+    target_sources(app PRIVATE ${proto_sources})
+    target_include_directories(app PRIVATE
+        ${ZEPHYR_BASE}/include   
+    tests/bmi160_test/src)
+    target_sources(app PRIVATE tests/bmi160_test/src/test_bmi160.c)
+
+else()
+    target_sources(app PRIVATE ${proto_sources} src/main.c)
+endif()

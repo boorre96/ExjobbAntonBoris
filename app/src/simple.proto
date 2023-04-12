@@ -5,5 +5,7 @@
 syntax = "proto3";
 
 message SimpleMessage {
-    int32 lucky_number = 1;
+    int32 regNum = 1;
+    int32 val = 2;
+    int32 read = 3;
 }

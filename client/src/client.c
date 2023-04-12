@@ -6,6 +6,7 @@
 #include <pb_encode.h>
 #include <pb_decode.h>
 #include "simple.pb.h"
+#include "../includes/bmi_160/register.h"
 
 void clientInit(Client* client){
     client->clientFd = -1;
@@ -44,20 +45,20 @@ int clientConnect(Client* client, const char* serverIp){
     return 0;
 }
 
-int clientSend(Client* client, const int number){
-    /*Sending a protobuf to server*/
-    printf("clientSend function \n");
+/*Sending a protobuf to server*/
+int clientSend(Client* client, const int value){
 
-    SimpleMessage message = SimpleMessage_init_zero;
+    /* Instantiates an empty protobuf and insert "value" into the protobuf */
+    SimpleMessage message = {0};
+    message.val = value;
+    
+    /* Create a buffer which will store the encoded message */
     uint8_t buffer[1024];
 
+    /* Creates a Protocol Buffers output stream object, named 'stream', by initializing it with a given buffer and its corresponding size */
     pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
 
-    message.lucky_number = number;
-
-    bool status = pb_encode(&stream, SimpleMessage_fields, &message);
-
-    if(!status){
+    if(!pb_encode(&stream, SimpleMessage_fields, &message)){
         printf("The encoding didn't work! \n");
         return 0;
     }
@@ -66,10 +67,11 @@ int clientSend(Client* client, const int number){
         return -1;
     }
 
-    printf("protobuf message sent \n");
+    printf("Protobuf message sent \n");
 
     return 1;
 }
+
 
 int clientReceive(Client* client, char* buffer, int size){
     
@@ -81,16 +83,35 @@ int clientReceive(Client* client, char* buffer, int size){
     }
     else{
         printf("Recieved protobuf from server! \n");
+        
         /*Decode the protobuf*/
-        SimpleMessage fromServerMessage = SimpleMessage_init_zero;
-		pb_istream_t stream = pb_istream_from_buffer(buffer, bytesReceived);
 
+        /* Instantiates an empty protobuf */
+        SimpleMessage fromServerMessage = {0};
+
+		pb_istream_t stream = pb_istream_from_buffer(buffer, bytesReceived);
+        
         if(pb_decode(&stream, SimpleMessage_fields, &fromServerMessage)){
-				printf("Recieved protobuf from client and the decoding worked \n");
-				printf("Your lucky number is: %d! \n", (int)fromServerMessage.lucky_number);
+
+			printf("Decoding worked! \n");
+            
+            if(fromServerMessage.read == 2){
+                printf("FROM REG_READ \n");
+                printf("Sending value from register: %d back to server... \n", fromServerMessage.regNum);
+                printf("Test: %d\n", BMI160_REG_ERR);
+                clientSend(client, 10);
+            }
+            else if(fromServerMessage.read == 1){
+                printf("FROM REG_WRITE \n");
+                printf("Writing the value: %d into the register number: %d \n", fromServerMessage.val, fromServerMessage.regNum);
+            }
+            else{
+                printf("Wrong value in fromServerMessage... \n");
+                return -1;
+            }
 		}
 		else{
-				printf("Failed to decode the message... \n");
+			printf("Failed to decode the message... \n");
 		}
     }
 
@@ -108,18 +129,14 @@ int main (void) {
 		return -1;
 	}
 
-	if(clientSend(&client, 2) == -1){
-		clientCleanup(&client);
-		return -1;
-	}
+    while(true){
 
+        if(clientReceive(&client, buffer, sizeof(buffer)) == -1){
+		    clientCleanup(&client);
+		    return false;
+	    }
+    }
 
-	if(clientReceive(&client, buffer, sizeof(buffer)) == -1){
-		clientCleanup(&client);
-		return -1;
-	}
-
-	printf("%s \n",buffer);
 
 	clientCleanup(&client);
 

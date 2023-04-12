@@ -6,32 +6,17 @@
 #include <pb_decode.h>
 #include "src/simple.pb.h"
 
+int encode(SimpleMessage *message, Server *server){
 
-#include <zephyr/logging/log.h>
-
-LOG_MODULE_REGISTER(bmi160_log);
-
-
-// Register write
-static void reg_write(Server *server, int reg, int val){
-	printk("REG_WRITE \n");
-
-	/* 
-	1. Enter the values into the protobuf
-	2. Encode the protobuf into the server buffer
-	3. Send the encoded protobuf through websocket
-	*/
-	SimpleMessage message = {0};
-	message.lucky_number = val;
-
-	memset(server->buffer, 0, 1024);
 	/*
 	pb_ostream_t creates a object which is a structure that representa a nonopb output stream from a
 	given memory buffer. The output stream is used to store the encoded protocol buffer.
 
 	server.buffer is where the encoded protocol buffer will be stored.
 	*/
+
 	pb_ostream_t stream = pb_ostream_from_buffer(server->buffer, 1024);
+
 	/*
 		pb_encode encodes the protobuf message into a binary format that can be sent over a network or
 		stored in a file.
@@ -42,34 +27,89 @@ static void reg_write(Server *server, int reg, int val){
 		&toClientMessage - A pointer to the message that you want to encode. This object should be of
 						   the same type as the one described by SimpleMessage_fields (SimpleMessage). 
 		*/
-	bool status = pb_encode(&stream, SimpleMessage_fields, &message);
 
-	if(!status){
-			printk("failed to encode... \n");
+	if(!pb_encode(&stream, SimpleMessage_fields, message)){
+		LOG_ERR("Encode failed.");
+		//printk("failed to encode... \n");
+		return -1;
 	}
 	else{
-		if(send(server->new_socket, server->buffer, stream.bytes_written, 0) == -1){
-				printk("Failed to send to client! \n");
-		}
-		else{
-				printk("Protobuf sent to client! \n");
-		}
+		LOG_WRN("Encoding worked.");
+		//printk("Encoding worked.. \n");
+		return stream.bytes_written;;
 	}
+
+
+}
+int decode(SimpleMessage *message, Server *server, int bytesFromClient){
+
+	/*
+	Pb_istream_t creates a object which is a structure that represents a nanopb input stream.
+	It initializes the input stream to read data from the server.buffer and bytes tells the stream
+	how many bytes it can read from the given buffer.  
+	*/
+
+	pb_istream_t stream = pb_istream_from_buffer(server->buffer, bytesFromClient);
+
+	/*
+	pb_decode decodes the protobuf message from a serialized binary format.
+	Three arguments:
+	&stream - A pointer to a pb_istream_f structure which represent the input stream that
+				contains the serialized binary data.
+	SimpleMessage_fields - An array of file descriptors for the protocolbuffer message structure
+							you wnat to decode. It refers to your .proto file.
+	&fromClientMessage - A pointer to the target message structure where the decoded data should
+							be stored.  
+	*/
+
+	if(pb_decode(&stream, SimpleMessage_fields, message)){
+		LOG_WRN("Decoding worked");
+		return 1;
+	}
+	else{
+		LOG_ERR("Failed to decode the message");
+		return 0;
+	}
+
+}
+static bool reg_write(Server *server, int reg, int val){
+	LOG_INF("REG_WRITE");
+
+	SimpleMessage message = {0};
+	message.val = val;
+	message.regNum = reg;
+	message.read = 1;
+
+	memset(server->buffer, 0, 1024);
+
+	if((bytesToSend = encode(&message, server)) == -1){
+		LOG_ERR("Encode error");
+		return false;
+	}
+	
+	if(send(server->new_socket, server->buffer, bytesToSend, 0) == -1){
+		LOG_ERR("Unable to send to client");
+		return false;
+	}
+
+	LOG_DBG("Protobuf sent to client");
+
 		
-    printk("write %x = %x", reg, val);
+    //LOG_DBG("write %x = %x \n", reg, val);
+	LOG_DBG("write value: %d to register: 0x%x", val, reg);
 
     switch(reg){
         case BMI160_REG_ACC_CONF:
-            LOG_INF("   * acc conf");
+            LOG_INF("0x%x register name = acc conf ", reg);
             break;
         case BMI160_REG_ACC_RANGE:
-            LOG_INF("   * acc range");
-            break;
+			LOG_INF("0x%x register name = acc range ", reg);
+			break;
         case BMI160_REG_GYR_CONF:
-            LOG_INF("   * gyr conf");
+			LOG_INF("0x%x register name = gyr conf ", reg);
             break;
         case BMI160_REG_GYR_RANGE:
-            LOG_INF("   * gyr range");
+			LOG_INF("0x%x register name = gyr range \n", reg);
             break;
         case BMI160_REG_CMD:
             switch(val){
@@ -94,87 +134,79 @@ static void reg_write(Server *server, int reg, int val){
                             shift = BMI160_PMU_STATUS_MAG_POS;
                             break;
                         }
-                        /*
-                        *write over
-                        */
                     }
             }
     }
+	return true;
 }
-
 // Register read
 static int reg_read(Server *server, int reg){
+	LOG_INF("REG_READ");
 	
-	/*
-	1. Enter the register number into protobuf
-	2. Encode the data
-	3. Send a protobuf through websocket
-	4. Wait until you have got something
-	5. Print what you got
-	*/
+	//
 	SimpleMessage message = {0};
-	message.lucky_number = reg;
+	message.regNum = reg;
+	message.read = 2;
+
+	SimpleMessage messageFromClient = {0};
 	
-	//reg_write(server, )
-    size_t bytes = read(server->new_socket, server->buffer, sizeof(server->buffer));
-		if(bytes == -1){
-			printk("Error read function \n");
+	if((bytesToSend = encode(&message, server)) == -1){
+		LOG_ERR("Encode error");
+	}
+	else{
+		if(send(server->new_socket, server->buffer, bytesToSend, 0) == -1){
+			LOG_ERR("Unable to send to client");
 		}
 		else{
+			LOG_WRN("Protobuf sent to client");
+		}
+	}
+	
+    size_t bytes = read(server->new_socket, server->buffer, sizeof(server->buffer));
+		if(bytes == -1){
+			LOG_ERR("Read error");
+			return -1;
+		}
+		else{
+			LOG_INF("Message read successfully");
 			
-			SimpleMessage fromClientMessage = SimpleMessage_init_zero;
-			/*
-			Pb_istream_t creates a object which is a structure that represents a nanopb input stream.
-			It initializes the input stream to read data from the server.buffer and bytes tells the stream
-			how many bytes it can read from the given buffer.  
-			*/
-			pb_istream_t stream = pb_istream_from_buffer(server->buffer, bytes);
+			
 
-			/*
-			pb_decode decodes the protobuf message from a serialized binary format.
-			Three arguments:
-			&stream - A pointer to a pb_istream_f structure which represent the input stream that
-					  contains the serialized binary data.
-			SimpleMessage_fields - An array of file descriptors for the protocolbuffer message structure
-							       you wnat to decode. It refers to your .proto file.
-			&fromClientMessage - A pointer to the target message structure where the decoded data should
-								 be stored.  
-			*/
-			if(pb_decode(&stream, SimpleMessage_fields, &fromClientMessage)){
-				printk("Recieved protobuf from client and the decoding worked \n");
-				printk("Your lucky number is: %d! \n", (int)fromClientMessage.lucky_number);
+			if(!decode(&messageFromClient, server, bytes)){
+				LOG_ERR("Decode error");
+				return -1;
 			}
 			else{
-				printk("Failed to decode the message... \n");
+				LOG_DBG("Value is: %d", messageFromClient.val);
 			}
 		}
-	
-	printk("Read %x = \n", reg);
-    int val;
+
+	LOG_DBG("Read register: 0x%x", reg);
+    int val = messageFromClient.val;
     switch(reg){
         case BMI160_REG_CHIPID:
-            LOG_INF("   * get chipid");
+			LOG_INF("0x%x register name = chip id ", reg);
             break;
         case BMI160_REG_PMU_STATUS:
-            LOG_INF("   * get pmu");
+			LOG_INF("0x%x register name = pmu status ", reg);
             break;
         case BMI160_REG_STATUS:
-            LOG_INF("   * status");
+			LOG_INF("0x%x register name = status ", reg);
             break;
         case BMI160_REG_ACC_CONF:
-            LOG_INF("   * acc conf");
+			LOG_INF("0x%x register name = acc conf ", reg);
             break;
         case BMI160_REG_GYR_CONF:
-            LOG_INF("   * gyr conf");
+			LOG_INF("0x%x register name = gyr conf ", reg);
             break;
         case BMI160_SPI_START:
-            LOG_INF("   * Bus start");
+			LOG_INF("0x%x register name = spi start ", reg);
             break;
         case BMI160_REG_ACC_RANGE:
-            LOG_INF("   * acc range");
+			LOG_INF("0x%x register name = acc range ", reg);
             break;
         case BMI160_REG_GYR_RANGE:
-            LOG_INF("   * gyr range");
+			LOG_INF("0x%x register name = gyr range ", reg);
             break;
         default:
             LOG_INF("Unknown read %x", reg);
