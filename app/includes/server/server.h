@@ -1,13 +1,14 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <netinet/in.h>
+/* #include <netinet/in.h> */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
-#include <unistd.h>
+/* #include <sys/socket.h> */
+//#include <unistd.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/net/socket.h>
 
 
 #define PORT 8080

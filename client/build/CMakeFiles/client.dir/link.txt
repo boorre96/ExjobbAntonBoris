@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/client.dir/client.c.o "CMakeFiles/client.dir/home/anton-dev/Thesis/my-workspace/ExjobbAntonBoris/app/src/simple.pb.c.o" -o client  libnanopb.a 

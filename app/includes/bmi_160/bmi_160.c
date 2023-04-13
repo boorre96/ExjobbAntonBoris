@@ -1,7 +1,7 @@
 #include "bmi_160.h"
 #include "register.h"
 #include <zephyr/sys/printk.h>
-#include <unistd.h>
+
 
 #include <pb_encode.h>
 #include <pb_decode.h>
