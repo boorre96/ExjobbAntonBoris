@@ -1,9 +1,10 @@
 #include <zephyr/ztest.h>
 #include <zephyr/sys/printk.h>
+#include <zephyr/zephyr.h>
 /* #include <zephyr/logging/log.h>
 #include "../../../includes/server/server.c" */
 
-
+#include <zephyr/drivers/sensor.h>
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(test_log, LOG_LEVEL_DBG);
 
@@ -32,7 +33,8 @@ static void websocket_test(void){
 
 }
 
-static void test_reg_write(void){
+static void test_reg_write(void){    
+
     // Test case 1 - BMI160_REG_ACC_CONF
     zassert(reg_write(&server, BMI160_REG_ACC_CONF, 10), "Test case 1 - Failed to write to BMI160_REG_ACC_CONF");
 
@@ -71,6 +73,6 @@ ztest_test_suite(bmi160_simple_tests,
                 ztest_unit_test(test_reg_read),
                 ztest_unit_test(test_reg_read_write_consistency));
 
-void test_main(void){
+void test_main(void){    
     ztest_run_test_suite(bmi160_simple_tests);
 }

@@ -1,6 +1,7 @@
 #include "bmi_160.h"
 #include "register.h"
 #include <zephyr/sys/printk.h>
+#include <unistd.h>
 
 #include <pb_encode.h>
 #include <pb_decode.h>
@@ -100,13 +101,13 @@ static bool reg_write(Server *server, int reg, int val){
 
     switch(reg){
         case BMI160_REG_ACC_CONF:
-            LOG_INF("0x%x register name = acc conf ", reg);
+            LOG_INF("0x%x register name = acc conf \n", reg);
             break;
         case BMI160_REG_ACC_RANGE:
-			LOG_INF("0x%x register name = acc range ", reg);
+			LOG_INF("0x%x register name = acc range \n", reg);
 			break;
         case BMI160_REG_GYR_CONF:
-			LOG_INF("0x%x register name = gyr conf ", reg);
+			LOG_INF("0x%x register name = gyr conf \n", reg);
             break;
         case BMI160_REG_GYR_RANGE:
 			LOG_INF("0x%x register name = gyr range \n", reg);
@@ -185,33 +186,32 @@ static int reg_read(Server *server, int reg){
     int val = messageFromClient.val;
     switch(reg){
         case BMI160_REG_CHIPID:
-			LOG_INF("0x%x register name = chip id ", reg);
+			LOG_INF("0x%x register name = chip id \n", reg);
             break;
         case BMI160_REG_PMU_STATUS:
-			LOG_INF("0x%x register name = pmu status ", reg);
+			LOG_INF("0x%x register name = pmu status \n", reg);
             break;
         case BMI160_REG_STATUS:
-			LOG_INF("0x%x register name = status ", reg);
+			LOG_INF("0x%x register name = status \n", reg);
             break;
         case BMI160_REG_ACC_CONF:
-			LOG_INF("0x%x register name = acc conf ", reg);
+			LOG_INF("0x%x register name = acc conf \n", reg);
             break;
         case BMI160_REG_GYR_CONF:
-			LOG_INF("0x%x register name = gyr conf ", reg);
+			LOG_INF("0x%x register name = gyr conf \n", reg);
             break;
         case BMI160_SPI_START:
-			LOG_INF("0x%x register name = spi start ", reg);
+			LOG_INF("0x%x register name = spi start \n", reg);
             break;
         case BMI160_REG_ACC_RANGE:
-			LOG_INF("0x%x register name = acc range ", reg);
+			LOG_INF("0x%x register name = acc range \n", reg);
             break;
         case BMI160_REG_GYR_RANGE:
-			LOG_INF("0x%x register name = gyr range ", reg);
+			LOG_INF("0x%x register name = gyr range \n", reg);
             break;
         default:
-            LOG_INF("Unknown read %x", reg);
+            LOG_INF("Unknown read %x\n", reg);
     }
-    LOG_INF("       = %x", val);
 
     return val;
 }
