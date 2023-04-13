@@ -1,4 +1,0 @@
-/home/anton-dev/Thesis/my-workspace/ExjobbAntonBoris/client/build/CMakeFiles/nanopb.dir
-/home/anton-dev/Thesis/my-workspace/ExjobbAntonBoris/client/build/CMakeFiles/client.dir
-/home/anton-dev/Thesis/my-workspace/ExjobbAntonBoris/client/build/CMakeFiles/edit_cache.dir
-/home/anton-dev/Thesis/my-workspace/ExjobbAntonBoris/client/build/CMakeFiles/rebuild_cache.dir
