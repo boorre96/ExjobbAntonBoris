@@ -31,16 +31,16 @@ int main(void)
 		{
 			scanf(" %c", &s);
 			if(s == 'w'){
-				reg_write(&server, 5, 6);
+				reg_write(&server, 4, 6);
 			}
 			else if(s == 'r'){
-				reg_read(&server, 0);
+				reg_read(&server, 2);
 			}
 			else{
 				reg_write(&server, 5, 100);
 				LOG_ERR("Socket closing");
 				break;
-			} 
+			}
 			
 		}
 		close(server.new_socket);

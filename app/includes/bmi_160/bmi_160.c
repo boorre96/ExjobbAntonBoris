@@ -30,12 +30,12 @@ int encode(SimpleMessage *message, Server *server){
 		*/
 
 	if(!pb_encode(&stream, SimpleMessage_fields, message)){
-		LOG_ERR("Encode failed.");
+		//LOG_ERR("Encode failed.");
 		//printk("failed to encode... \n");
 		return -1;
 	}
 	else{
-		LOG_WRN("Encoding worked.");
+		//LOG_WRN("Encoding worked.");
 		//printk("Encoding worked.. \n");
 		return stream.bytes_written;;
 	}
@@ -64,11 +64,11 @@ int decode(SimpleMessage *message, Server *server, int bytesFromClient){
 	*/
 
 	if(pb_decode(&stream, SimpleMessage_fields, message)){
-		LOG_WRN("Decoding worked");
+		//LOG_WRN("Decoding worked");
 		return 1;
 	}
 	else{
-		LOG_ERR("Failed to decode the message");
+		//LOG_ERR("Failed to decode the message");
 		return 0;
 	}
 
@@ -77,6 +77,9 @@ static bool reg_write(Server *server, int reg, int val){
 	LOG_INF("REG_WRITE");
 
 	SimpleMessage message = {0};
+	if (val == 0){
+			val = 99999999;
+		}
 	message.val = val;
 	message.regNum = reg;
 	message.read = 1;
@@ -93,10 +96,6 @@ static bool reg_write(Server *server, int reg, int val){
 		return false;
 	}
 
-	LOG_DBG("Protobuf sent to client");
-
-		
-    //LOG_DBG("write %x = %x \n", reg, val);
 	LOG_DBG("write value: %d to register: 0x%x", val, reg);
 
     switch(reg){
@@ -159,7 +158,7 @@ static int reg_read(Server *server, int reg){
 			LOG_ERR("Unable to send to client");
 		}
 		else{
-			LOG_WRN("Protobuf sent to client");
+			// LOG_WRN("Protobuf sent to client");
 		}
 	}
 	
@@ -169,7 +168,7 @@ static int reg_read(Server *server, int reg){
 			return -1;
 		}
 		else{
-			LOG_INF("Message read successfully");
+			// LOG_INF("Message read successfully");
 			
 			
 
@@ -178,6 +177,9 @@ static int reg_read(Server *server, int reg){
 				return -1;
 			}
 			else{
+				if(messageFromClient.val == 99999999){
+					messageFromClient.val = 0;
+				}
 				LOG_DBG("Value is: %d", messageFromClient.val);
 			}
 		}
