@@ -61,13 +61,50 @@ static void test_reg_read(void){
 }
 
 static void test_reg_read_write_consistency(void){
-    //uint8_t write_val = 10;
-    uint8_t write_val = 78;
+    uint8_t write_val;
     uint8_t read_val;
 
+      write_val = 78;
+    zassert_true(reg_write(&server, BMI160_REG_CHIPID, write_val), "Failed to write to BMI160_REG_CHIPID");
+    read_val = reg_read(&server, BMI160_REG_CHIPID);
+    zassert_equal(write_val, read_val, "Test case 1 - Register read-write consistency error for BMI160_REG_CHIPID");
+
+    // Test case 2 - BMI160_REG_PMU_STATUS
+    write_val = 90;
+    zassert_true(reg_write(&server, BMI160_REG_PMU_STATUS, write_val), "Failed to write to BMI160_REG_PMU_STATUS");
+    read_val = reg_read(&server, BMI160_REG_PMU_STATUS);
+    zassert_equal(write_val, read_val, "Test case 2 - Register read-write consistency error for BMI160_REG_PMU_STATUS");
+
+    // Test case 3 - BMI160_REG_STATUS
+    write_val = 55;
+    zassert_true(reg_write(&server, BMI160_REG_STATUS, write_val), "Failed to write to BMI160_REG_STATUS");
+    read_val = reg_read(&server, BMI160_REG_STATUS);
+    zassert_equal(write_val, read_val, "Test case 3 - Register read-write consistency error for BMI160_REG_STATUS");
+
+    // Test case 4 - BMI160_REG_ACC_CONF
+    write_val = 120;
     zassert_true(reg_write(&server, BMI160_REG_ACC_CONF, write_val), "Failed to write to BMI160_REG_ACC_CONF");
     read_val = reg_read(&server, BMI160_REG_ACC_CONF);
-    zassert_equal(write_val, read_val, "Register read-write consistency error");
+    zassert_equal(write_val, read_val, "Test case 4 - Register read-write consistency error for BMI160_REG_ACC_CONF");
+
+    // Test case 5 - BMI160_REG_GYR_CONF
+    write_val = 45;
+    zassert_true(reg_write(&server, BMI160_REG_GYR_CONF, write_val), "Failed to write to BMI160_REG_GYR_CONF");
+    read_val = reg_read(&server, BMI160_REG_GYR_CONF);
+    zassert_equal(write_val, read_val, "Test case 5 - Register read-write consistency error for BMI160_REG_GYR_CONF");
+
+
+    // Test case 6 - BMI160_REG_ACC_RANGE
+    write_val = 88;
+    zassert_true(reg_write(&server, BMI160_REG_ACC_RANGE, write_val), "Failed to write to BMI160_REG_ACC_RANGE");
+    read_val = reg_read(&server, BMI160_REG_ACC_RANGE);
+    zassert_equal(write_val, read_val, "Test case 7 - Register read-write consistency error for BMI160_REG_ACC_RANGE");
+
+    // Test case 7 - BMI160_REG_GYR_RANGE
+    write_val = 66;
+    zassert_true(reg_write(&server, BMI160_REG_GYR_RANGE, write_val), "Failed to write to BMI160_REG_GYR_RANGE");
+    read_val = reg_read(&server, BMI160_REG_GYR_RANGE);
+    zassert_equal(write_val, read_val, "Test case 8 - Register read-write consistency error for BMI160_REG_ACC_RANGE");
 }
 
 ztest_test_suite(bmi160_simple_tests, 
